@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
+	"github.com/phamstack/godek/models"
 
 	// postgres driver dialect
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -28,13 +28,22 @@ func InitDB() {
 		host, port, user, dbname)
 
 	// verify postgres and psqlInfo valid
-	db, err := gorm.Open("postgres", psqlInfo)
+	us, err := models.NewUserService(psqlInfo)
 
 	if err != nil {
 		panic(err)
 	}
-	defer db.Close()
+	defer us.Close()
 
-	db.LogMode(true)
+	us.DestructiveReset()
 	log.Printf("connected to database %s on port %s", dbname, port)
+
+	tom := &models.User{
+		Email:    "tom@brady.ne",
+		Name:     "Thomas Brady",
+		Username: "cheat",
+	}
+	if err := us.Create(tom); err != nil {
+		panic(err)
+	}
 }

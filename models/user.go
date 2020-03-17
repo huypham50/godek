@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/jinzhu/gorm"
-	"github.com/phamstack/godek/graph/model"
 )
 
 var (
@@ -16,11 +15,11 @@ var (
 // will put into pg database as `users` table
 type User struct {
 	gorm.Model
-	Name        string            `json:"name"`
-	Username    string            `json:"username"`
-	Email       string            `json:"email" gorm:"not null;unique_index"`
-	Avatar      string            `json:"avatar"`
-	AccountType model.AccountType `json:"accountType"`
+	Name        string `json:"name"`
+	Username    string `json:"username"`
+	Email       string `json:"email" gorm:"not null;unique_index"`
+	Avatar      string `json:"avatar"`
+	AccountType int    `json:"accountType"`
 }
 
 // UserService -> layer implementation of users

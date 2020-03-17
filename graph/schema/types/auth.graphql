@@ -1,0 +1,4 @@
+type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
+  user: User!
+  token: String!
+}

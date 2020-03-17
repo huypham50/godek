@@ -1,0 +1,7 @@
+type User @goModel(model: "github.com/phamstack/godek/models.User") {
+  name: String!
+  username: String!
+  email: String!
+  avatar: String!
+  accountType: Int!
+}

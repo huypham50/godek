@@ -1,0 +1,10 @@
+type Mutation {
+  loginGoogle(
+    token: String!
+    name: String!
+    email: String!
+    avatar: String!
+  ): Auth!
+  logout: User!
+  logoutAll: User!
+}
