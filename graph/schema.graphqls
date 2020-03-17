@@ -2,27 +2,30 @@
 #
 # https://gqlgen.com/getting-started/
 
-type Todo {
-  id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
-}
-
-type User {
-  id: ID!
-  name: String!
+type Mutation {
+  loginGoogle(
+    token: String!
+    name: String!
+    email: String!
+    avatar: String!
+  ): Auth!
+  logout: User!
+  logoutAll: User!
 }
 
 type Query {
-  todos: [Todo!]!
+  me: User!
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+type User {
+  name: String!
+  username: String!
+  email: String!
+  avatar: String!
+  accountType: Int!
 }
 
-type Mutation {
-  createTodo(input: NewTodo!): Todo!
+type Auth {
+  user: User!
+  token: String!
 }
