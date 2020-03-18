@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -21,15 +21,15 @@ type contextKey struct {
 func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			c, err := r.Cookie("auth-cookie")
+			c := r.Header.Get("Authorizatio")
+
+			fmt.Println("c is ", c, c == "")
 
 			// Allow unauthenticated users in
-			if err != nil || c == nil {
+			if c == "" {
 				next.ServeHTTP(w, r)
 				return
 			}
-
-			log.Println("Cookie is ", c)
 
 			// userId, err := validateAndGetUserID(c)
 			// if err != nil {

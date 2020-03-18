@@ -56,6 +56,11 @@ func NewServices(cfgs ...ServicesConfig) (*Services, error) {
 	return &s, nil
 }
 
+// GetDB -> returns db instance
+func (s *Services) GetDB() *gorm.DB {
+	return s.db
+}
+
 // Close -> closes the database connection
 func (s *Services) Close() error {
 	return s.db.Close()
