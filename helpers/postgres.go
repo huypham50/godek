@@ -10,8 +10,7 @@ import (
 
 // GetConnectionInfo -> return psqlInfo string after accessing env
 func GetConnectionInfo() string {
-	err := godotenv.Load("dev.env")
-	if err != nil {
+	if err := godotenv.Load("dev.env"); err != nil {
 		log.Fatal("Error loading .env files")
 	}
 

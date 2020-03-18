@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
@@ -21,12 +20,10 @@ type contextKey struct {
 func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			c := r.Header.Get("Authorizatio")
-
-			fmt.Println("c is ", c, c == "")
+			token := r.Header.Get("Authorization")
 
 			// Allow unauthenticated users in
-			if c == "" {
+			if token == "" {
 				next.ServeHTTP(w, r)
 				return
 			}

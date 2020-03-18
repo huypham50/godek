@@ -8,11 +8,42 @@ import (
 	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
+	"github.com/phamstack/godek/helpers"
 	"github.com/phamstack/godek/models"
 )
 
 func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name string, email string, avatar string) (*models.Auth, error) {
-	panic(fmt.Errorf("not implemented"))
+	user, err := r.Services.User.ByEmail(email)
+
+	if err != models.ErrNotFound && err != nil {
+		return nil, err
+	}
+
+	if err == models.ErrNotFound {
+		userCount := r.Services.User.Count()
+		username := helpers.GenerateUsername(email, userCount)
+
+		newUser := &models.User{
+			Name:     name,
+			Email:    email,
+			Username: username,
+			Avatar:   avatar,
+		}
+		r.Services.User.Create(newUser)
+
+		authToken := r.Services.User.GenerateAuthToken(newUser)
+
+		return &models.Auth{
+			User:  newUser,
+			Token: authToken,
+		}, nil
+	}
+
+	authToken := r.Services.User.GenerateAuthToken(user)
+	return &models.Auth{
+		User:  user,
+		Token: authToken,
+	}, nil
 }
 
 func (r *mutationResolver) Logout(ctx context.Context) (*models.User, error) {

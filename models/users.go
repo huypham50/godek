@@ -2,9 +2,14 @@ package models
 
 import (
 	"errors"
-	"fmt"
+	"log"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
+	"github.com/joho/godotenv"
+	"github.com/phamstack/godek/helpers"
 )
 
 var (
@@ -62,20 +67,83 @@ func (us *UserService) ByID(id uint) (*User, error) {
 	}
 }
 
+// ByEmail -> find user by email
+// 1 - user, nil
+// 2 - nil, ErrNotFound
+// 3 - nil,otherError (something else went wrong -> 500 error)
+func (us *UserService) ByEmail(email string) (*User, error) {
+	var user User
+
+	err := us.db.Where("email = ?", email).First(&user).Error
+
+	switch err {
+	case nil:
+		return &user, nil
+	case gorm.ErrRecordNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
 // Create -> create provided user
 func (us *UserService) Create(user *User) error {
 	return us.db.Create(user).Error
 }
 
+// Count -> total number of users
+func (us *UserService) Count() int {
+	var count int
+	us.db.Model(&User{}).Count(&count)
+	return count
+}
+
+// GenerateAuthToken -> generate access token when user logs in
+func (us *UserService) GenerateAuthToken(user *User) string {
+	if err := godotenv.Load("dev.env"); err != nil {
+		log.Fatal("Error loading .env files")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id":  user.Username,
+		"exp": time.Now().Add(time.Hour * time.Duration(1)).Unix(),
+		"iat": time.Now().Unix(),
+	})
+	tokenString, _ := token.SignedString([]byte(jwtSecret))
+
+	helpers.LoggerLine(tokenString, user.Email)
+
+	return tokenString
+}
+
+// ParseAuthToken -> decodes the token and returns user id
+func (us *UserService) ParseAuthToken(jwtToken string) (string, error) {
+	if err := godotenv.Load("dev.env"); err != nil {
+		log.Fatal("Error loading .env files")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	token, err := jwt.Parse(jwtToken, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// type assertion -> else go specifies interface instead of string
+		// https://stackoverflow.com/questions/14289256/cannot-convert-data-type-interface-to-type-string-need-type-assertion
+		return claims["id"].(string), nil
+	}
+
+	return "", errors.New("Invalid JWT Token")
+}
+
 // Close -> closes the server database connection
 func (us *UserService) Close() error {
 	return us.db.Close()
-}
-
-// Demo -> closes the server database connection
-func (us *UserService) Demo() error {
-	fmt.Printf("%T\n", us.db.Create)
-	return nil
 }
 
 // DestructiveReset -> drops the user table and rebuilds it
