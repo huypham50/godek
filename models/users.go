@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/jinzhu/gorm"
 )
@@ -10,6 +11,13 @@ var (
 	// ErrNotFound -> no user in the db
 	ErrNotFound = errors.New("models: resource not found")
 )
+
+// Auth -> return auth user and access token
+// after a successful login
+type Auth struct {
+	User  *User  `json:"user"`
+	Token string `json:"token"`
+}
 
 // User -> schema-generated user struct
 // will put into pg database as `users` table
@@ -29,17 +37,10 @@ type UserService struct {
 
 // NewUserService -> create a new instance of an UserService
 // with error and db handling
-func NewUserService(connectionInfo string) (*UserService, error) {
-	db, err := gorm.Open("postgres", connectionInfo)
-	if err != nil {
-		return nil, err
-	}
-	// dev mode only
-	db.LogMode(true)
-	// defer db.Close() -> dont use here
-	return &UserService{
+func NewUserService(db *gorm.DB) UserService {
+	return UserService{
 		db: db,
-	}, nil
+	}
 }
 
 // ByID -> what might happen
@@ -69,6 +70,12 @@ func (us *UserService) Create(user *User) error {
 // Close -> closes the server database connection
 func (us *UserService) Close() error {
 	return us.db.Close()
+}
+
+// Demo -> closes the server database connection
+func (us *UserService) Demo() error {
+	fmt.Printf("%T\n", us.db.Create)
+	return nil
 }
 
 // DestructiveReset -> drops the user table and rebuilds it

@@ -16,9 +16,8 @@ func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 		Email: "matt@gooch.bc",
 	}
 
-	err := r.db.Create(me)
-	if err != nil {
-		panic("Noooooooooo")
+	if err := r.Services.User.Create(me); err != nil {
+		return nil, err
 	}
 
 	return me, nil

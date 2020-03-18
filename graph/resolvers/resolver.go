@@ -1,6 +1,8 @@
 package resolvers
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/phamstack/godek/models"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,5 +10,6 @@ import "github.com/jinzhu/gorm"
 
 // Resolver -> root resolver
 type Resolver struct {
-	db *gorm.DB
+	// db *gorm.DB
+	Services *models.Services
 }

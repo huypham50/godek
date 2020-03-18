@@ -16,7 +16,8 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 }
 
 func (r *mutationResolver) Logout(ctx context.Context) (*models.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	fmt.Println(ctx)
+	return nil, nil
 }
 
 func (r *mutationResolver) LogoutAll(ctx context.Context) (*models.User, error) {
