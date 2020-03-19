@@ -2,9 +2,7 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/phamstack/godek/models"
 )
@@ -22,7 +20,8 @@ type contextKey struct {
 func Middleware(s *models.Services) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			fmt.Println("33333 ", time.Now())
+			// Get string will convert to object if necessary
+			// undefined, "", nil
 			token := r.Header.Get("Authorization")
 
 			// Allow unauthenticated users in
@@ -33,7 +32,7 @@ func Middleware(s *models.Services) func(http.Handler) http.Handler {
 
 			userID, err := s.User.ParseAuthToken(token)
 			if err != nil {
-				http.Error(w, "Invalid cookie", http.StatusForbidden)
+				http.Error(w, "Invalid token 403 status codes are important", http.StatusForbidden)
 				return
 			}
 

@@ -13,6 +13,7 @@ import (
 	"github.com/phamstack/godek/helpers"
 	"github.com/phamstack/godek/helpers/auth"
 	"github.com/phamstack/godek/models"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -31,6 +32,18 @@ func main() {
 	defer services.Close()
 
 	router := chi.NewRouter()
+
+	// Add CORS middleware around every request
+	// See https://github.com/rs/cors for full option listing
+	router.Use(cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:7877"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}).Handler)
+
 	router.Use(auth.Middleware(services))
 	router.Use(middleware.Logger)
 	// initializing graphql server

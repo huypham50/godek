@@ -13,6 +13,7 @@ import (
 )
 
 func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name string, email string, avatar string) (*models.Auth, error) {
+	fmt.Println("#FETCHING", token, email)
 	user, err := r.Services.User.ByEmail(email)
 
 	if err != models.ErrNotFound && err != nil {
