@@ -5,22 +5,20 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 
 	"github.com/phamstack/godek/graph/generated"
+	"github.com/phamstack/godek/helpers/auth"
 	"github.com/phamstack/godek/models"
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
-	me := &models.User{
-		Name:  "Matt",
-		Email: "matt@gooch.bc",
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
 	}
 
-	if err := r.Services.User.Create(me); err != nil {
-		return nil, err
-	}
-
-	return me, nil
+	return user, nil
 }
 
 // Query returns generated.QueryResolver implementation.

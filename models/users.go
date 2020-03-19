@@ -106,7 +106,7 @@ func (us *UserService) GenerateAuthToken(user *User) string {
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  user.Username,
+		"id":  user.Email,
 		"exp": time.Now().Add(time.Hour * time.Duration(1)).Unix(),
 		"iat": time.Now().Unix(),
 	})

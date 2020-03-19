@@ -2,9 +2,10 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"time"
 
-	"github.com/jinzhu/gorm"
 	"github.com/phamstack/godek/models"
 )
 
@@ -12,14 +13,16 @@ import (
 // to prevent collisions between different context uses
 var userCtxKey = &contextKey{"user"}
 
+// ContextKey -> context id
 type contextKey struct {
 	name string
 }
 
 // Middleware decodes the share session cookie and packs the session into context
-func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
+func Middleware(s *models.Services) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Println("33333 ", time.Now())
 			token := r.Header.Get("Authorization")
 
 			// Allow unauthenticated users in
@@ -28,20 +31,20 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 				return
 			}
 
-			// userId, err := validateAndGetUserID(c)
-			// if err != nil {
-			// 	http.Error(w, "Invalid cookie", http.StatusForbidden)
-			// 	return
-			// }
+			userID, err := s.User.ParseAuthToken(token)
+			if err != nil {
+				http.Error(w, "Invalid cookie", http.StatusForbidden)
+				return
+			}
 
-			// // get the user from the database
-			// user := getUserByID(db, userId)
+			// get the user from the database
+			user, _ := s.User.ByEmail(userID)
 
-			// // put it in context
-			// ctx := context.WithValue(r.Context(), userCtxKey, user)
+			// put it in context
+			ctx := context.WithValue(r.Context(), userCtxKey, user)
 
 			// and call the next with our new context
-			// r = r.WithContext(ctx)
+			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -49,6 +52,6 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 
 // ForContext finds the user from the context. REQUIRES Middleware to have run.
 func ForContext(ctx context.Context) *models.User {
-	raw, _ := ctx.Value(userCtxKey).(*models.User)
-	return raw
+	user, _ := ctx.Value(userCtxKey).(*models.User)
+	return user
 }

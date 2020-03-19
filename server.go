@@ -7,6 +7,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/graph/resolvers"
 	"github.com/phamstack/godek/helpers"
@@ -30,7 +31,8 @@ func main() {
 	defer services.Close()
 
 	router := chi.NewRouter()
-	router.Use(auth.Middleware(services.GetDB()))
+	router.Use(auth.Middleware(services))
+	router.Use(middleware.Logger)
 	// initializing graphql server
 	rootResolver := &resolvers.Resolver{
 		Services: services,
@@ -41,5 +43,8 @@ func main() {
 	router.Handle("/query", server)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, router))
+	err = http.ListenAndServe(":"+port, router)
+	if err != nil {
+		panic(err)
+	}
 }
