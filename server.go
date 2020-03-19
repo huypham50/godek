@@ -43,8 +43,6 @@ func main() {
 	router.Handle("/query", server)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	err = http.ListenAndServe(":"+port, router)
-	if err != nil {
-		panic(err)
-	}
+
+	panic(http.ListenAndServe(":"+port, router))
 }
