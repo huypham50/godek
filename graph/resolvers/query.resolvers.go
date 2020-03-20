@@ -8,7 +8,7 @@ import (
 	"errors"
 
 	"github.com/phamstack/godek/graph/generated"
-	"github.com/phamstack/godek/helpers/auth"
+	"github.com/phamstack/godek/lib/auth"
 	"github.com/phamstack/godek/models"
 )
 

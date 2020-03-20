@@ -10,4 +10,5 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/rs/cors v1.7.0
 	github.com/vektah/gqlparser/v2 v2.0.1
+	google.golang.org/genproto v0.0.0-20200319113533-08878b785e9c // indirect
 )

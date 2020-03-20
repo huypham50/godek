@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/jinzhu/gorm"
 	"github.com/joho/godotenv"
-	"github.com/phamstack/godek/helpers"
+	"github.com/phamstack/godek/lib/helpers"
 )
 
 var (

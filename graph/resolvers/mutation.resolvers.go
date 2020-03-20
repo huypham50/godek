@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
-	"github.com/phamstack/godek/helpers"
+	"github.com/phamstack/godek/lib/db"
 	"github.com/phamstack/godek/models"
 )
 
@@ -16,13 +16,16 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 	fmt.Println("#FETCHING", token, email)
 	user, err := r.Services.User.ByEmail(email)
 
+	fmt.Println("User is:")
+	fmt.Printf("%+v\n", user)
+
 	if err != models.ErrNotFound && err != nil {
 		return nil, err
 	}
 
 	if err == models.ErrNotFound {
 		userCount := r.Services.User.Count()
-		username := helpers.GenerateUsername(email, userCount)
+		username := db.GenerateUsername(email, userCount)
 
 		newUser := &models.User{
 			Name:     name,

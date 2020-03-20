@@ -10,15 +10,16 @@ import (
 	"github.com/go-chi/chi/middleware"
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/graph/resolvers"
-	"github.com/phamstack/godek/helpers"
-	"github.com/phamstack/godek/helpers/auth"
+	"github.com/phamstack/godek/lib/auth"
+	"github.com/phamstack/godek/lib/db"
+	"github.com/phamstack/godek/lib/helpers"
 	"github.com/phamstack/godek/models"
 	"github.com/rs/cors"
 )
 
 func main() {
 	port := "8088"
-	connectionInfo := helpers.GetConnectionInfo()
+	connectionInfo := db.GetConnectionInfo()
 
 	// connecting to postgres database
 	// db, err := gorm.Open("postgres", connectionInfo)
@@ -30,6 +31,9 @@ func main() {
 	helpers.Must(err)
 	services.DestructiveReset()
 	defer services.Close()
+
+	// seeds users
+	db.SeedDatabase(services)
 
 	router := chi.NewRouter()
 
