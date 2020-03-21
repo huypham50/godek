@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 		Logout              func(childComplexity int) int
 		LogoutAll           func(childComplexity int) int
 		UpdateDeck          func(childComplexity int, id int, title string, description string, label string, color string, archive bool) int
-		UpdateGoogleAccount func(childComplexity int, name string, username string) int
+		UpdateGoogleAccount func(childComplexity int, name string) int
 	}
 
 	Query struct {
@@ -88,7 +88,6 @@ type ComplexityRoot struct {
 		ID          func(childComplexity int) int
 		Name        func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
-		Username    func(childComplexity int) int
 	}
 }
 
@@ -97,7 +96,7 @@ type MutationResolver interface {
 	Logout(ctx context.Context) (*models.User, error)
 	LogoutAll(ctx context.Context) (*models.User, error)
 	DeleteGoogleAccount(ctx context.Context, email string) (*models.User, error)
-	UpdateGoogleAccount(ctx context.Context, name string, username string) (*models.User, error)
+	UpdateGoogleAccount(ctx context.Context, name string) (*models.User, error)
 	CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
 	UpdateDeck(ctx context.Context, id int, title string, description string, label string, color string, archive bool) (*models.Deck, error)
 	DeleteDeck(ctx context.Context, id int) (*models.Deck, error)
@@ -290,7 +289,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateGoogleAccount(childComplexity, args["name"].(string), args["username"].(string)), true
+		return e.complexity.Mutation.UpdateGoogleAccount(childComplexity, args["name"].(string)), true
 
 	case "Query.decks":
 		if e.complexity.Query.Decks == nil {
@@ -368,13 +367,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.UpdatedAt(childComplexity), true
-
-	case "User.username":
-		if e.complexity.User.Username == nil {
-			break
-		}
-
-		return e.complexity.User.Username(childComplexity), true
 
 	}
 	return 0, false
@@ -464,7 +456,7 @@ directive @goField(
   logout: User!
   logoutAll: User!
   deleteGoogleAccount(email: String!): User!
-  updateGoogleAccount(name: String!, username: String!): User!
+  updateGoogleAccount(name: String!): User!
 
   # Deck Service
   createDeck(
@@ -545,7 +537,6 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   email: String!
   googleId: String!
   name: String!
-  username: String!
   avatar: String!
   accountType: Int!
 
@@ -728,14 +719,6 @@ func (ec *executionContext) field_Mutation_updateGoogleAccount_args(ctx context.
 		}
 	}
 	args["name"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["username"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["username"] = arg1
 	return args, nil
 }
 
@@ -1368,7 +1351,7 @@ func (ec *executionContext) _Mutation_updateGoogleAccount(ctx context.Context, f
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateGoogleAccount(rctx, args["name"].(string), args["username"].(string))
+		return ec.resolvers.Mutation().UpdateGoogleAccount(rctx, args["name"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1861,40 +1844,6 @@ func (ec *executionContext) _User_name(ctx context.Context, field graphql.Collec
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_username(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Username, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3304,11 +3253,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "name":
 			out.Values[i] = ec._User_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "username":
-			out.Values[i] = ec._User_username(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

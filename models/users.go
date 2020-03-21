@@ -36,7 +36,6 @@ type User struct {
 	Email       string `json:"email" gorm:"not null;unique_index"`
 	GoogleID    string `json:"googleId" gorm:"not null;unique_index"`
 	Name        string `json:"name"`
-	Username    string `json:"username"`
 	Avatar      string `json:"avatar"`
 	AccountType int    `json:"accountType"`
 	// associations
@@ -97,6 +96,11 @@ func (us *UserService) ByID(id int) (*User, error) {
 // Create -> create provided user
 func (us *UserService) Create(user *User) error {
 	return us.db.Create(user).Error
+}
+
+// Update -> Update user (right now name only)
+func (us *UserService) Update(user *User, newName string) error {
+	return us.db.Model(user).Update("name", newName).Error
 }
 
 // Delete -> delete requested user

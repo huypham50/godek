@@ -10,7 +10,6 @@ import (
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
-	"github.com/phamstack/godek/lib/db"
 	"github.com/phamstack/godek/models"
 )
 
@@ -30,16 +29,13 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 	}
 
 	if err == models.ErrNotFound {
-		userCount := r.Services.User.Count()
-		username := db.GenerateUsername(email, userCount)
-
 		newUser := &models.User{
 			GoogleID: token,
 			Name:     name,
 			Email:    email,
-			Username: username,
 			Avatar:   avatar,
 		}
+
 		err := r.Services.User.Create(newUser)
 		if err != nil {
 			return nil, err
@@ -84,31 +80,20 @@ func (r *mutationResolver) DeleteGoogleAccount(ctx context.Context, email string
 	return user, nil
 }
 
-func (r *mutationResolver) UpdateGoogleAccount(ctx context.Context, name string, username string) (*models.User, error) {
+func (r *mutationResolver) UpdateGoogleAccount(ctx context.Context, name string) (*models.User, error) {
 	// get user from context middleware
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")
 	}
 
-	// Find requested removed deck and verify
-	updatedUser, err := r.Services.User.ID(user.ID)
-	if err != nil {
+	if err := r.Services.User.Update(user, name); err != nil {
 		return nil, err
 	}
 
-	// deck can only be removed by owner
-	if user.ID != updatedUser.ID {
-		return nil, errors.New("You are unauthorized to edit this deck")
-	}
+	user.Name = name
 
-	updatedUser.Name = name
-
-	if err := r.Services.User.Update(updatedUser); err != nil {
-		return nil, err
-	}
-
-	return updatedUser, nil
+	return user, nil
 }
 
 func (r *mutationResolver) CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
