@@ -10,6 +10,7 @@ import (
 // Services -> single database connection to different services
 type Services struct {
 	User UserService
+	Deck DeckService
 	db   *gorm.DB
 }
 
@@ -44,6 +45,14 @@ func WithUser() ServicesConfig {
 	}
 }
 
+// WithDeck -> init only instance of &DeckService
+func WithDeck() ServicesConfig {
+	return func(s *Services) error {
+		s.Deck = NewDeckService(s.db)
+		return nil
+	}
+}
+
 // NewServices -> single source of truth
 // umbrella db connection -> connect to other services
 func NewServices(cfgs ...ServicesConfig) (*Services, error) {
@@ -68,7 +77,7 @@ func (s *Services) Close() error {
 
 // DestructiveReset -> drops all tables and rebuilds them
 func (s *Services) DestructiveReset() error {
-	err := s.db.DropTableIfExists(&User{}).Error
+	err := s.db.DropTableIfExists(&User{}, &Deck{}).Error
 	if err != nil {
 		return err
 	}
@@ -77,5 +86,5 @@ func (s *Services) DestructiveReset() error {
 
 // AutoMigrate -> reset database table
 func (s *Services) AutoMigrate() error {
-	return s.db.AutoMigrate(&User{}).Error
+	return s.db.AutoMigrate(&User{}, &Deck{}).Error
 }

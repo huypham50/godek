@@ -6,7 +6,6 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
@@ -14,6 +13,7 @@ import (
 )
 
 func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
+	// TODO: Preload stuffs -> rethink fetching at middleware
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("Unauthenticated")
@@ -23,7 +23,17 @@ func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 }
 
 func (r *queryResolver) Decks(ctx context.Context) ([]*models.Deck, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	decks, err := r.Services.Deck.Filter(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return decks, nil
 }
 
 // Query returns generated.QueryResolver implementation.

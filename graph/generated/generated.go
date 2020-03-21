@@ -50,16 +50,16 @@ type ComplexityRoot struct {
 	}
 
 	Deck struct {
-		Archive   func(childComplexity int) int
-		Color     func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		DeletedAt func(childComplexity int) int
-		Desc      func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Label     func(childComplexity int) int
-		Title     func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
-		UserID    func(childComplexity int) int
+		Archive     func(childComplexity int) int
+		Color       func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Label       func(childComplexity int) int
+		Title       func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UserID      func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -163,12 +163,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Deck.DeletedAt(childComplexity), true
 
-	case "Deck.desc":
-		if e.complexity.Deck.Desc == nil {
+	case "Deck.description":
+		if e.complexity.Deck.Description == nil {
 			break
 		}
 
-		return e.complexity.Deck.Desc(childComplexity), true
+		return e.complexity.Deck.Description(childComplexity), true
 
 	case "Deck.id":
 		if e.complexity.Deck.ID == nil {
@@ -518,10 +518,10 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   updatedAt: Time!
   deletedAt: Time
 
-  userId: String!
+  userId: ID!
 
   title: String!
-  desc: String!
+  description: String!
   label: String!
   color: String!
   archive: Boolean!
@@ -972,9 +972,9 @@ func (ec *executionContext) _Deck_userId(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Deck_title(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
@@ -1011,7 +1011,7 @@ func (ec *executionContext) _Deck_title(ctx context.Context, field graphql.Colle
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Deck_desc(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
+func (ec *executionContext) _Deck_description(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -1028,7 +1028,7 @@ func (ec *executionContext) _Deck_desc(ctx context.Context, field graphql.Collec
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Desc, nil
+		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3055,8 +3055,8 @@ func (ec *executionContext) _Deck(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "desc":
-			out.Values[i] = ec._Deck_desc(ctx, field, obj)
+		case "description":
+			out.Values[i] = ec._Deck_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

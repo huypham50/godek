@@ -27,6 +27,7 @@ func main() {
 		models.WithGorm("postgres", connectionInfo),
 		models.WithLogMode(true),
 		models.WithUser(),
+		models.WithDeck(),
 	)
 	helpers.Must(err)
 	services.DestructiveReset()

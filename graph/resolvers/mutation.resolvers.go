@@ -30,7 +30,6 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 	}
 
 	if err == models.ErrNotFound {
-		fmt.Println("4444")
 		userCount := r.Services.User.Count()
 		username := db.GenerateUsername(email, userCount)
 
@@ -41,7 +40,10 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 			Username: username,
 			Avatar:   avatar,
 		}
-		r.Services.User.Create(newUser)
+		err := r.Services.User.Create(newUser)
+		if err != nil {
+			return nil, err
+		}
 
 		authToken := r.Services.User.GenerateAuthToken(newUser)
 
@@ -83,7 +85,25 @@ func (r *mutationResolver) DeleteGoogleAccount(ctx context.Context, email string
 }
 
 func (r *mutationResolver) CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	newDeck := &models.Deck{
+		UserID:      user.ID,
+		Title:       title,
+		Description: description,
+		Label:       label,
+		Color:       color,
+	}
+
+	err := r.Services.Deck.Create(newDeck)
+	if err != nil {
+		return nil, err
+	}
+
+	return newDeck, nil
 }
 
 func (r *mutationResolver) UpdateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
