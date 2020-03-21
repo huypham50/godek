@@ -6,6 +6,7 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
@@ -19,6 +20,10 @@ func (r *queryResolver) Me(ctx context.Context) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *queryResolver) Decks(ctx context.Context) ([]*models.Deck, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

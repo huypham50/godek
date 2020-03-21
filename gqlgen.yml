@@ -57,3 +57,5 @@ models:
     model: github.com/phamstack/godek/models.User
   Auth:
     model: github.com/phamstack/godek/models.Auth
+  Deck:
+    model: github.com/phamstack/godek/models.Deck

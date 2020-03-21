@@ -82,6 +82,18 @@ func (r *mutationResolver) DeleteGoogleAccount(ctx context.Context, email string
 	return user, nil
 }
 
+func (r *mutationResolver) CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) UpdateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteDeck(ctx context.Context, id string) (*models.Deck, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 

@@ -40,7 +40,7 @@ type User struct {
 	Avatar      string `json:"avatar"`
 	AccountType int    `json:"accountType"`
 	// associations
-	Decks []models.Deck `json:"decks"`
+	Decks []Deck `json:"decks"`
 }
 
 // UserService -> layer implementation of users

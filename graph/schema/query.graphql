@@ -1,3 +1,5 @@
 type Query {
   me: User!
+
+  decks: [Deck]
 }

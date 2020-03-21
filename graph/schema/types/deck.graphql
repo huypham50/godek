@@ -10,5 +10,5 @@ type Deck @goModel(model: "github.com/phamstack/godek/models.User") {
   desc: String!
   label: String!
   color: String!
-  archive: Bool!
+  archive: Boolean!
 }
