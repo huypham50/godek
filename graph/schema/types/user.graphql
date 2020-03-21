@@ -11,5 +11,5 @@ type User @goModel(model: "github.com/phamstack/godek/models.User") {
   avatar: String!
   accountType: Int!
 
-  decks: [Deck]
+  # decks: [Deck]
 }

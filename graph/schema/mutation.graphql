@@ -23,5 +23,5 @@ type Mutation {
     label: String!
     color: String!
   ): Deck!
-  deleteDeck(id: String!): Deck!
+  deleteDeck(id: Int!): Deck!
 }

@@ -64,7 +64,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateDeck          func(childComplexity int, title string, description string, label string, color string) int
-		DeleteDeck          func(childComplexity int, id string) int
+		DeleteDeck          func(childComplexity int, id int) int
 		DeleteGoogleAccount func(childComplexity int, email string) int
 		LoginGoogle         func(childComplexity int, token string, name string, email string, avatar string) int
 		Logout              func(childComplexity int) int
@@ -81,7 +81,6 @@ type ComplexityRoot struct {
 		AccountType func(childComplexity int) int
 		Avatar      func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
-		Decks       func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
 		Email       func(childComplexity int) int
 		GoogleID    func(childComplexity int) int
@@ -99,7 +98,7 @@ type MutationResolver interface {
 	DeleteGoogleAccount(ctx context.Context, email string) (*models.User, error)
 	CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
 	UpdateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
-	DeleteDeck(ctx context.Context, id string) (*models.Deck, error)
+	DeleteDeck(ctx context.Context, id int) (*models.Deck, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
@@ -227,7 +226,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteDeck(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteDeck(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteGoogleAccount":
 		if e.complexity.Mutation.DeleteGoogleAccount == nil {
@@ -313,13 +312,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.CreatedAt(childComplexity), true
-
-	case "User.decks":
-		if e.complexity.User.Decks == nil {
-			break
-		}
-
-		return e.complexity.User.Decks(childComplexity), true
 
 	case "User.deletedAt":
 		if e.complexity.User.DeletedAt == nil {
@@ -472,7 +464,7 @@ directive @goField(
     label: String!
     color: String!
   ): Deck!
-  deleteDeck(id: String!): Deck!
+  deleteDeck(id: Int!): Deck!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/query.graphql", Input: `type Query {
@@ -540,7 +532,7 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   avatar: String!
   accountType: Int!
 
-  decks: [Deck]
+  # decks: [Deck]
 }
 `, BuiltIn: false},
 }
@@ -591,9 +583,9 @@ func (ec *executionContext) field_Mutation_createDeck_args(ctx context.Context, 
 func (ec *executionContext) field_Mutation_deleteDeck_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
+	var arg0 int
 	if tmp, ok := rawArgs["id"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1403,7 +1395,7 @@ func (ec *executionContext) _Mutation_deleteDeck(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteDeck(rctx, args["id"].(string))
+		return ec.resolvers.Mutation().DeleteDeck(rctx, args["id"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1889,37 +1881,6 @@ func (ec *executionContext) _User_accountType(ctx context.Context, field graphql
 	res := resTmp.(int)
 	fc.Result = res
 	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _User_decks(ctx context.Context, field graphql.CollectedField, obj *models.User) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "User",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Decks, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]models.Deck)
-	fc.Result = res
-	return ec.marshalODeck2ᚕgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐDeck(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3260,8 +3221,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "decks":
-			out.Values[i] = ec._User_decks(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3881,46 +3840,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 
 func (ec *executionContext) marshalODeck2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐDeck(ctx context.Context, sel ast.SelectionSet, v models.Deck) graphql.Marshaler {
 	return ec._Deck(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalODeck2ᚕgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐDeck(ctx context.Context, sel ast.SelectionSet, v []models.Deck) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalODeck2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐDeck(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
 }
 
 func (ec *executionContext) marshalODeck2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐDeck(ctx context.Context, sel ast.SelectionSet, v []*models.Deck) graphql.Marshaler {

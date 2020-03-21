@@ -84,10 +84,14 @@ func (r *mutationResolver) DeleteGoogleAccount(ctx context.Context, email string
 	return user, nil
 }
 
+// 2 possibilities:
+// A. put userid in frontend first -> no need to get user from ctx
+// B. validate at backend -> extra user query here -> safer
+// X. nevertheless -> needs to validate at frontend anyway?
 func (r *mutationResolver) CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
-		return nil, errors.New("Unauthenticated")
+		return nil, errors.New("You are not logged in yet")
 	}
 
 	newDeck := &models.Deck{
@@ -110,8 +114,30 @@ func (r *mutationResolver) UpdateDeck(ctx context.Context, title string, descrip
 	panic(fmt.Errorf("not implemented"))
 }
 
-func (r *mutationResolver) DeleteDeck(ctx context.Context, id string) (*models.Deck, error) {
-	panic(fmt.Errorf("not implemented"))
+func (r *mutationResolver) DeleteDeck(ctx context.Context, id int) (*models.Deck, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	removedDeck, err := r.Services.Deck.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != removedDeck.UserID {
+		return nil, errors.New("You are unauthorized to delete this deck")
+	}
+
+	// remove user
+	if err := r.Services.Deck.Delete(removedDeck); err != nil {
+		return nil, err
+	}
+
+	return removedDeck, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

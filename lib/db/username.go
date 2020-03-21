@@ -9,6 +9,7 @@ import (
 func GenerateUsername(email string, count int) string {
 	components := strings.Split(email, "@")
 	emailUsername := components[0]
+	count = count + 1
 
 	return emailUsername + strconv.Itoa(count)
 }

@@ -9,25 +9,25 @@ func SeedDatabase(s *models.Services) {
 			GoogleID: "198923",
 			Email:    "peyton@manni.ng",
 			Name:     "Peyton Manning",
-			Username: "peyton0",
+			Username: "peyton1",
 		},
 		models.User{
 			GoogleID: "743823",
 			Email:    "drew@brees.no",
 			Name:     "Drew Brees",
-			Username: "drew1",
+			Username: "drew2",
 		},
 		models.User{
 			GoogleID: "668323",
 			Email:    "jimmyg@49ers.com",
 			Name:     "Jimmy Garoppolo",
-			Username: "jimmy2",
+			Username: "jimmy3",
 		},
 		models.User{
 			GoogleID: "007482",
 			Email:    "luck@blood.colts",
 			Name:     "Andrew Luck",
-			Username: "luck3",
+			Username: "luck4",
 		},
 	}
 

@@ -36,12 +36,33 @@ func NewDeckService(db *gorm.DB) DeckService {
 	}
 }
 
-// Create -> create provided user
+// ByID -> get deck by id
+func (ds *DeckService) ByID(ID int) (*Deck, error) {
+	var deck Deck
+
+	err := ds.db.Where("id = ?", ID).First(&deck).Error
+
+	switch err {
+	case nil:
+		return &deck, nil
+	case gorm.ErrRecordNotFound:
+		return nil, ErrNotFound
+	default:
+		return nil, err
+	}
+}
+
+// Create -> create provided deck
 func (ds *DeckService) Create(deck *Deck) error {
 	return ds.db.Create(deck).Error
 }
 
-// Delete -> delete requested user
+// Update -> update deck
+func (ds *DeckService) Update(deck *Deck) error {
+	return ds.db.Save(deck).Error
+}
+
+// Delete -> delete requested deck
 func (ds *DeckService) Delete(deck *Deck) error {
 	return ds.db.Delete(deck).Error
 }
