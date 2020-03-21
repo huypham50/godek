@@ -30,14 +30,14 @@ func Middleware(s *models.Services) func(http.Handler) http.Handler {
 				return
 			}
 
-			userID, err := s.User.ParseAuthToken(token)
+			googleID, err := s.User.ParseAuthToken(token)
 			if err != nil {
 				http.Error(w, "Invalid token 403 status codes are important", http.StatusForbidden)
 				return
 			}
 
 			// get the user from the database
-			user, _ := s.User.ByEmail(userID)
+			user, _ := s.User.ByGoogleID(googleID)
 
 			// put it in context
 			ctx := context.WithValue(r.Context(), userCtxKey, user)

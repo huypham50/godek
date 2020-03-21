@@ -28,9 +28,10 @@ type Auth struct {
 // will put into pg database as `users` table
 type User struct {
 	gorm.Model
+	Email       string `json:"email" gorm:"not null;unique_index"`
+	GoogleID    string `json:"googleid" gorm:"not null;unique_index"`
 	Name        string `json:"name"`
 	Username    string `json:"username"`
-	Email       string `json:"email" gorm:"not null;unique_index"`
 	Avatar      string `json:"avatar"`
 	AccountType int    `json:"accountType"`
 }
@@ -48,14 +49,14 @@ func NewUserService(db *gorm.DB) UserService {
 	}
 }
 
-// ByID -> what might happen
+// ByGoogleID -> what might happen
 // 1 - user, nil
 // 2 - nil, ErrNotFound
 // 3 - nil,otherError (something else went wrong -> 500 error)
-func (us *UserService) ByID(id uint) (*User, error) {
+func (us *UserService) ByGoogleID(googleID string) (*User, error) {
 	var user User
 
-	err := us.db.Where("id = ?", id).First(&user).Error
+	err := us.db.Where("google_id = ?", googleID).First(&user).Error
 
 	switch err {
 	case nil:
@@ -106,7 +107,7 @@ func (us *UserService) GenerateAuthToken(user *User) string {
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  user.Email,
+		"id":  user.GoogleID,
 		"exp": time.Now().Add(time.Hour * time.Duration(1)).Unix(),
 		"iat": time.Now().Unix(),
 	})

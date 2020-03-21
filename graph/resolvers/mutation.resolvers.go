@@ -5,6 +5,7 @@ package resolvers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
@@ -14,13 +15,17 @@ import (
 
 func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name string, email string, avatar string) (*models.Auth, error) {
 	fmt.Println("#FETCHING", token, email)
-	user, err := r.Services.User.ByEmail(email)
+	user, err := r.Services.User.ByGoogleID(token)
 
 	fmt.Println("User is:")
 	fmt.Printf("%+v\n", user)
 
 	if err != models.ErrNotFound && err != nil {
 		return nil, err
+	}
+
+	if user.Email != email {
+		return nil, errors.New("ggid != email")
 	}
 
 	if err == models.ErrNotFound {
