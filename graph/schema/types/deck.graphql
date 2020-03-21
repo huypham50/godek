@@ -1,0 +1,14 @@
+type Deck @goModel(model: "github.com/phamstack/godek/models.User") {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
+
+  userId: ID!
+
+  title: String!
+  description: String!
+  label: String!
+  color: String!
+  archive: Boolean!
+}
