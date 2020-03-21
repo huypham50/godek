@@ -1,4 +1,5 @@
 type Mutation {
+  # User Service
   loginGoogle(
     token: String!
     name: String!
@@ -7,4 +8,20 @@ type Mutation {
   ): Auth!
   logout: User!
   logoutAll: User!
+  deleteGoogleAccount(email: String!): User!
+
+  # Deck Service
+  createDeck(
+    title: String!
+    description: String!
+    label: String!
+    color: String!
+  ): Deck!
+  updateDeck(
+    title: String!
+    description: String!
+    label: String!
+    color: String!
+  ): Deck!
+  deleteDeck(id: String!): Deck!
 }

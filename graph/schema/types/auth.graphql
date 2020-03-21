@@ -1,3 +1,4 @@
+# not stored in database, used to returns to user after signup/login
 type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   user: User!
   token: String!

@@ -1,8 +1,15 @@
 type User @goModel(model: "github.com/phamstack/godek/models.User") {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
+
   email: String!
   googleId: String!
   name: String!
   username: String!
   avatar: String!
   accountType: Int!
+
+  decks: [Deck]
 }

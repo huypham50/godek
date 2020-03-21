@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
+	"github.com/phamstack/godek/lib/auth"
 	"github.com/phamstack/godek/lib/db"
 	"github.com/phamstack/godek/models"
 )
@@ -20,19 +21,21 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 	fmt.Println("User is:")
 	fmt.Printf("%+v\n", user)
 
-	if err != models.ErrNotFound && err != nil {
+	if err != nil && err != models.ErrNotFound {
 		return nil, err
 	}
 
-	if user.Email != email {
+	if user != nil && user.Email != email {
 		return nil, errors.New("ggid != email")
 	}
 
 	if err == models.ErrNotFound {
+		fmt.Println("4444")
 		userCount := r.Services.User.Count()
 		username := db.GenerateUsername(email, userCount)
 
 		newUser := &models.User{
+			GoogleID: token,
 			Name:     name,
 			Email:    email,
 			Username: username,
@@ -56,12 +59,27 @@ func (r *mutationResolver) LoginGoogle(ctx context.Context, token string, name s
 }
 
 func (r *mutationResolver) Logout(ctx context.Context) (*models.User, error) {
-	fmt.Println(ctx)
-	return nil, nil
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) LogoutAll(ctx context.Context) (*models.User, error) {
 	panic(fmt.Errorf("not implemented"))
+}
+
+func (r *mutationResolver) DeleteGoogleAccount(ctx context.Context, email string) (*models.User, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	if user.Email == email {
+		err := r.Services.User.Delete(user)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return user, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

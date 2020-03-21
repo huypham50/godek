@@ -27,13 +27,20 @@ type Auth struct {
 // User -> schema-generated user struct
 // will put into pg database as `users` table
 type User struct {
-	gorm.Model
+	// gorm.model
+	ID        int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+	// entities
 	Email       string `json:"email" gorm:"not null;unique_index"`
-	GoogleID    string `json:"googleid" gorm:"not null;unique_index"`
+	GoogleID    string `json:"googleId" gorm:"not null;unique_index"`
 	Name        string `json:"name"`
 	Username    string `json:"username"`
 	Avatar      string `json:"avatar"`
 	AccountType int    `json:"accountType"`
+	// associations
+	Decks []models.Deck `json:"decks"`
 }
 
 // UserService -> layer implementation of users
@@ -90,6 +97,11 @@ func (us *UserService) ByEmail(email string) (*User, error) {
 // Create -> create provided user
 func (us *UserService) Create(user *User) error {
 	return us.db.Create(user).Error
+}
+
+// Delete -> delete requested user
+func (us *UserService) Delete(user *User) error {
+	return us.db.Delete(user).Error
 }
 
 // Count -> total number of users
