@@ -69,7 +69,8 @@ type ComplexityRoot struct {
 		LoginGoogle         func(childComplexity int, token string, name string, email string, avatar string) int
 		Logout              func(childComplexity int) int
 		LogoutAll           func(childComplexity int) int
-		UpdateDeck          func(childComplexity int, title string, description string, label string, color string) int
+		UpdateDeck          func(childComplexity int, id int, title string, description string, label string, color string, archive bool) int
+		UpdateGoogleAccount func(childComplexity int, name string, username string) int
 	}
 
 	Query struct {
@@ -96,8 +97,9 @@ type MutationResolver interface {
 	Logout(ctx context.Context) (*models.User, error)
 	LogoutAll(ctx context.Context) (*models.User, error)
 	DeleteGoogleAccount(ctx context.Context, email string) (*models.User, error)
+	UpdateGoogleAccount(ctx context.Context, name string, username string) (*models.User, error)
 	CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
-	UpdateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
+	UpdateDeck(ctx context.Context, id int, title string, description string, label string, color string, archive bool) (*models.Deck, error)
 	DeleteDeck(ctx context.Context, id int) (*models.Deck, error)
 }
 type QueryResolver interface {
@@ -276,7 +278,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDeck(childComplexity, args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string)), true
+		return e.complexity.Mutation.UpdateDeck(childComplexity, args["id"].(int), args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string), args["archive"].(bool)), true
+
+	case "Mutation.updateGoogleAccount":
+		if e.complexity.Mutation.UpdateGoogleAccount == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateGoogleAccount_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateGoogleAccount(childComplexity, args["name"].(string), args["username"].(string)), true
 
 	case "Query.decks":
 		if e.complexity.Query.Decks == nil {
@@ -450,6 +464,7 @@ directive @goField(
   logout: User!
   logoutAll: User!
   deleteGoogleAccount(email: String!): User!
+  updateGoogleAccount(name: String!, username: String!): User!
 
   # Deck Service
   createDeck(
@@ -459,10 +474,12 @@ directive @goField(
     color: String!
   ): Deck!
   updateDeck(
+    id: Int!
     title: String!
     description: String!
     label: String!
     color: String!
+    archive: Boolean!
   ): Deck!
   deleteDeck(id: Int!): Deck!
 }
@@ -649,38 +666,76 @@ func (ec *executionContext) field_Mutation_loginGoogle_args(ctx context.Context,
 func (ec *executionContext) field_Mutation_updateDeck_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["title"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["title"] = arg0
+	args["id"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["description"]; ok {
+	if tmp, ok := rawArgs["title"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["description"] = arg1
+	args["title"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["label"]; ok {
+	if tmp, ok := rawArgs["description"]; ok {
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["label"] = arg2
+	args["description"] = arg2
 	var arg3 string
-	if tmp, ok := rawArgs["color"]; ok {
+	if tmp, ok := rawArgs["label"]; ok {
 		arg3, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["color"] = arg3
+	args["label"] = arg3
+	var arg4 string
+	if tmp, ok := rawArgs["color"]; ok {
+		arg4, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["color"] = arg4
+	var arg5 bool
+	if tmp, ok := rawArgs["archive"]; ok {
+		arg5, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["archive"] = arg5
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateGoogleAccount_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["username"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["username"] = arg1
 	return args, nil
 }
 
@@ -1289,6 +1344,47 @@ func (ec *executionContext) _Mutation_deleteGoogleAccount(ctx context.Context, f
 	return ec.marshalNUser2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐUser(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_updateGoogleAccount(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateGoogleAccount_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateGoogleAccount(rctx, args["name"].(string), args["username"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐUser(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Mutation_createDeck(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1354,7 +1450,7 @@ func (ec *executionContext) _Mutation_updateDeck(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDeck(rctx, args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string))
+		return ec.resolvers.Mutation().UpdateDeck(rctx, args["id"].(int), args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string), args["archive"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3079,6 +3175,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteGoogleAccount":
 			out.Values[i] = ec._Mutation_deleteGoogleAccount(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateGoogleAccount":
+			out.Values[i] = ec._Mutation_updateGoogleAccount(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

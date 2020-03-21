@@ -75,14 +75,14 @@ func (us *UserService) ByGoogleID(googleID string) (*User, error) {
 	}
 }
 
-// ByEmail -> find user by email
+// ByID -> find user by email
 // 1 - user, nil
 // 2 - nil, ErrNotFound
 // 3 - nil,otherError (something else went wrong -> 500 error)
-func (us *UserService) ByEmail(email string) (*User, error) {
+func (us *UserService) ByID(id int) (*User, error) {
 	var user User
 
-	err := us.db.Where("email = ?", email).First(&user).Error
+	err := us.db.Where("id = ?", id).First(&user).Error
 
 	switch err {
 	case nil:
@@ -119,8 +119,9 @@ func (us *UserService) GenerateAuthToken(user *User) string {
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id":  user.GoogleID,
-		"exp": time.Now().Add(time.Hour * time.Duration(1)).Unix(),
+		"id": user.GoogleID,
+		// "exp": time.Now().Add(time.Hour * time.Duration(1)).Unix(),
+		"exp": int64(4199781663),
 		"iat": time.Now().Unix(),
 	})
 	tokenString, _ := token.SignedString([]byte(jwtSecret))

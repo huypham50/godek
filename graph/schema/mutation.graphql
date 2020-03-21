@@ -9,6 +9,7 @@ type Mutation {
   logout: User!
   logoutAll: User!
   deleteGoogleAccount(email: String!): User!
+  updateGoogleAccount(name: String!, username: String!): User!
 
   # Deck Service
   createDeck(
@@ -18,10 +19,12 @@ type Mutation {
     color: String!
   ): Deck!
   updateDeck(
+    id: Int!
     title: String!
     description: String!
     label: String!
     color: String!
+    archive: Boolean!
   ): Deck!
   deleteDeck(id: Int!): Deck!
 }
