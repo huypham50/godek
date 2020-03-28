@@ -44,4 +44,21 @@ type Mutation {
     complete: Boolean!
   ): Todo!
   deleteTodo(id: Int!): Todo!
+
+  # Bookmark Service
+  fetchBookmark(url: String!): Bookmark!
+  createBookmark(
+    deckId: Int
+    title: String!
+    description: String!
+    thumbnail: String!
+    wordCount: Int!
+  ): Bookmark!
+  updateBookmark(
+    id: Int!
+    deckId: Int
+    title: String!
+    description: String!
+  ): Bookmark!
+  deleteBookmark(id: Int!): Bookmark!
 }

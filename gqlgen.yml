@@ -61,3 +61,5 @@ models:
     model: github.com/phamstack/godek/models.Deck
   Todo:
     model: github.com/phamstack/godek/models.Todo
+  Bookmark:
+    model: github.com/phamstack/godek/models.Bookmark
