@@ -49,6 +49,21 @@ type ComplexityRoot struct {
 		User  func(childComplexity int) int
 	}
 
+	Bookmark struct {
+		Archive     func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
+		DeckID      func(childComplexity int) int
+		DeletedAt   func(childComplexity int) int
+		Description func(childComplexity int) int
+		ID          func(childComplexity int) int
+		Thumbnail   func(childComplexity int) int
+		Title       func(childComplexity int) int
+		URL         func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
+		UserID      func(childComplexity int) int
+		WordCount   func(childComplexity int) int
+	}
+
 	Deck struct {
 		Archive     func(childComplexity int) int
 		Color       func(childComplexity int) int
@@ -63,23 +78,28 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateBookmark      func(childComplexity int, deckID *int, title string, description string, thumbnail string, wordCount int) int
 		CreateDeck          func(childComplexity int, title string, description string, label string, color string) int
 		CreateTodo          func(childComplexity int, deckID *int, title string, description string, deadline time.Time) int
+		DeleteBookmark      func(childComplexity int, id int) int
 		DeleteDeck          func(childComplexity int, id int) int
 		DeleteGoogleAccount func(childComplexity int, email string) int
 		DeleteTodo          func(childComplexity int, id int) int
+		FetchBookmark       func(childComplexity int, url string) int
 		LoginGoogle         func(childComplexity int, token string, name string, email string, avatar string) int
 		Logout              func(childComplexity int) int
 		LogoutAll           func(childComplexity int) int
+		UpdateBookmark      func(childComplexity int, id int, deckID *int, title string, description string) int
 		UpdateDeck          func(childComplexity int, id int, title string, description string, label string, color string, archive bool) int
 		UpdateGoogleAccount func(childComplexity int, name string) int
 		UpdateTodo          func(childComplexity int, id int, deckID *int, title string, description string, deadline time.Time, complete bool) int
 	}
 
 	Query struct {
-		Decks func(childComplexity int) int
-		Me    func(childComplexity int) int
-		Todos func(childComplexity int) int
+		Bookmarks func(childComplexity int) int
+		Decks     func(childComplexity int) int
+		Me        func(childComplexity int) int
+		Todos     func(childComplexity int) int
 	}
 
 	Todo struct {
@@ -120,11 +140,16 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error)
 	UpdateTodo(ctx context.Context, id int, deckID *int, title string, description string, deadline time.Time, complete bool) (*models.Todo, error)
 	DeleteTodo(ctx context.Context, id int) (*models.Todo, error)
+	FetchBookmark(ctx context.Context, url string) (*models.Bookmark, error)
+	CreateBookmark(ctx context.Context, deckID *int, title string, description string, thumbnail string, wordCount int) (*models.Bookmark, error)
+	UpdateBookmark(ctx context.Context, id int, deckID *int, title string, description string) (*models.Bookmark, error)
+	DeleteBookmark(ctx context.Context, id int) (*models.Bookmark, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
 	Decks(ctx context.Context) ([]*models.Deck, error)
 	Todos(ctx context.Context) ([]*models.Todo, error)
+	Bookmarks(ctx context.Context) ([]*models.Bookmark, error)
 }
 
 type executableSchema struct {
@@ -155,6 +180,90 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Auth.User(childComplexity), true
+
+	case "Bookmark.archive":
+		if e.complexity.Bookmark.Archive == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.Archive(childComplexity), true
+
+	case "Bookmark.createdAt":
+		if e.complexity.Bookmark.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.CreatedAt(childComplexity), true
+
+	case "Bookmark.deckId":
+		if e.complexity.Bookmark.DeckID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.DeckID(childComplexity), true
+
+	case "Bookmark.deletedAt":
+		if e.complexity.Bookmark.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.DeletedAt(childComplexity), true
+
+	case "Bookmark.description":
+		if e.complexity.Bookmark.Description == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.Description(childComplexity), true
+
+	case "Bookmark.id":
+		if e.complexity.Bookmark.ID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.ID(childComplexity), true
+
+	case "Bookmark.thumbnail":
+		if e.complexity.Bookmark.Thumbnail == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.Thumbnail(childComplexity), true
+
+	case "Bookmark.title":
+		if e.complexity.Bookmark.Title == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.Title(childComplexity), true
+
+	case "Bookmark.url":
+		if e.complexity.Bookmark.URL == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.URL(childComplexity), true
+
+	case "Bookmark.updatedAt":
+		if e.complexity.Bookmark.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.UpdatedAt(childComplexity), true
+
+	case "Bookmark.userId":
+		if e.complexity.Bookmark.UserID == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.UserID(childComplexity), true
+
+	case "Bookmark.wordCount":
+		if e.complexity.Bookmark.WordCount == nil {
+			break
+		}
+
+		return e.complexity.Bookmark.WordCount(childComplexity), true
 
 	case "Deck.archive":
 		if e.complexity.Deck.Archive == nil {
@@ -226,6 +335,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Deck.UserID(childComplexity), true
 
+	case "Mutation.createBookmark":
+		if e.complexity.Mutation.CreateBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateBookmark(childComplexity, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["thumbnail"].(string), args["wordCount"].(int)), true
+
 	case "Mutation.createDeck":
 		if e.complexity.Mutation.CreateDeck == nil {
 			break
@@ -249,6 +370,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.CreateTodo(childComplexity, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time)), true
+
+	case "Mutation.deleteBookmark":
+		if e.complexity.Mutation.DeleteBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteBookmark(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteDeck":
 		if e.complexity.Mutation.DeleteDeck == nil {
@@ -286,6 +419,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(int)), true
 
+	case "Mutation.fetchBookmark":
+		if e.complexity.Mutation.FetchBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_fetchBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.FetchBookmark(childComplexity, args["url"].(string)), true
+
 	case "Mutation.loginGoogle":
 		if e.complexity.Mutation.LoginGoogle == nil {
 			break
@@ -311,6 +456,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.LogoutAll(childComplexity), true
+
+	case "Mutation.updateBookmark":
+		if e.complexity.Mutation.UpdateBookmark == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateBookmark_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateBookmark(childComplexity, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string)), true
 
 	case "Mutation.updateDeck":
 		if e.complexity.Mutation.UpdateDeck == nil {
@@ -347,6 +504,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.UpdateTodo(childComplexity, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time), args["complete"].(bool)), true
+
+	case "Query.bookmarks":
+		if e.complexity.Query.Bookmarks == nil {
+			break
+		}
+
+		return e.complexity.Query.Bookmarks(childComplexity), true
 
 	case "Query.decks":
 		if e.complexity.Query.Decks == nil {
@@ -625,6 +789,23 @@ directive @goField(
     complete: Boolean!
   ): Todo!
   deleteTodo(id: Int!): Todo!
+
+  # Bookmark Service
+  fetchBookmark(url: String!): Bookmark!
+  createBookmark(
+    deckId: Int
+    title: String!
+    description: String!
+    thumbnail: String!
+    wordCount: Int!
+  ): Bookmark!
+  updateBookmark(
+    id: Int!
+    deckId: Int
+    title: String!
+    description: String!
+  ): Bookmark!
+  deleteBookmark(id: Int!): Bookmark!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/query.graphql", Input: `type Query {
@@ -633,6 +814,8 @@ directive @goField(
   decks: [Deck]
 
   todos: [Todo]
+
+  bookmarks: [Bookmark]
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/scalars.graphql", Input: `# gqlgen supports some custom scalars out of the box
@@ -664,6 +847,23 @@ scalar Upload
 type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   user: User!
   token: String!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "graph/schema/types/bookmark.graphql", Input: `type Bookmark @goModel(model: "github.com/phamstack/godek/models.Bookmark") {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
+
+  userId: ID!
+  deckId: ID
+
+  url: String!
+  title: String!
+  description: String!
+  thumbnail: String!
+  wordCount: Int!
+  archive: Boolean!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/types/deck.graphql", Input: `type Deck @goModel(model: "github.com/phamstack/godek/models.User") {
@@ -718,6 +918,52 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_createBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["deckId"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["deckId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["description"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["thumbnail"]; ok {
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["thumbnail"] = arg3
+	var arg4 int
+	if tmp, ok := rawArgs["wordCount"]; ok {
+		arg4, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["wordCount"] = arg4
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_createDeck_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -795,6 +1041,20 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_deleteBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_deleteDeck_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -837,6 +1097,20 @@ func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, 
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_fetchBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["url"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["url"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_loginGoogle_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -872,6 +1146,44 @@ func (ec *executionContext) field_Mutation_loginGoogle_args(ctx context.Context,
 		}
 	}
 	args["avatar"] = arg3
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["deckId"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["deckId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg2
+	var arg3 string
+	if tmp, ok := rawArgs["description"]; ok {
+		arg3, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["description"] = arg3
 	return args, nil
 }
 
@@ -1113,6 +1425,408 @@ func (ec *executionContext) _Auth_token(ctx context.Context, field graphql.Colle
 	res := resTmp.(string)
 	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_id(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_updatedAt(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_deletedAt(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_userId(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_deckId(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeckID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalOID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_url(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_title(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_description(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_thumbnail(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Thumbnail, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_wordCount(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.WordCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Bookmark_archive(ctx context.Context, field graphql.CollectedField, obj *models.Bookmark) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Bookmark",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Archive, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Deck_id(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
@@ -1889,6 +2603,170 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐTodo(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_fetchBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_fetchBookmark_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FetchBookmark(rctx, args["url"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Bookmark)
+	fc.Result = res
+	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createBookmark_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateBookmark(rctx, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["thumbnail"].(string), args["wordCount"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Bookmark)
+	fc.Result = res
+	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateBookmark_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateBookmark(rctx, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Bookmark)
+	fc.Result = res
+	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteBookmark_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteBookmark(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Bookmark)
+	fc.Result = res
+	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -1983,6 +2861,37 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 	res := resTmp.([]*models.Todo)
 	fc.Result = res
 	return ec.marshalOTodo2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐTodo(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_bookmarks(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Bookmarks(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Bookmark)
+	fc.Result = res
+	return ec.marshalOBookmark2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3786,6 +4695,82 @@ func (ec *executionContext) _Auth(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var bookmarkImplementors = []string{"Bookmark"}
+
+func (ec *executionContext) _Bookmark(ctx context.Context, sel ast.SelectionSet, obj *models.Bookmark) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, bookmarkImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Bookmark")
+		case "id":
+			out.Values[i] = ec._Bookmark_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Bookmark_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Bookmark_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._Bookmark_deletedAt(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._Bookmark_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deckId":
+			out.Values[i] = ec._Bookmark_deckId(ctx, field, obj)
+		case "url":
+			out.Values[i] = ec._Bookmark_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "title":
+			out.Values[i] = ec._Bookmark_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Bookmark_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "thumbnail":
+			out.Values[i] = ec._Bookmark_thumbnail(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "wordCount":
+			out.Values[i] = ec._Bookmark_wordCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "archive":
+			out.Values[i] = ec._Bookmark_archive(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var deckImplementors = []string{"Deck"}
 
 func (ec *executionContext) _Deck(ctx context.Context, sel ast.SelectionSet, obj *models.Deck) graphql.Marshaler {
@@ -3925,6 +4910,26 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "fetchBookmark":
+			out.Values[i] = ec._Mutation_fetchBookmark(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createBookmark":
+			out.Values[i] = ec._Mutation_createBookmark(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateBookmark":
+			out.Values[i] = ec._Mutation_updateBookmark(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteBookmark":
+			out.Values[i] = ec._Mutation_deleteBookmark(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3985,6 +4990,17 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_todos(ctx, field)
+				return res
+			})
+		case "bookmarks":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_bookmarks(ctx, field)
 				return res
 			})
 		case "__type":
@@ -4391,6 +5407,20 @@ func (ec *executionContext) marshalNAuth2ᚖgithubᚗcomᚋphamstackᚋgodekᚋm
 	return ec._Auth(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNBookmark2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx context.Context, sel ast.SelectionSet, v models.Bookmark) graphql.Marshaler {
+	return ec._Bookmark(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx context.Context, sel ast.SelectionSet, v *models.Bookmark) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Bookmark(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
 	return graphql.UnmarshalBoolean(v)
 }
@@ -4727,6 +5757,57 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOBookmark2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx context.Context, sel ast.SelectionSet, v models.Bookmark) graphql.Marshaler {
+	return ec._Bookmark(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOBookmark2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx context.Context, sel ast.SelectionSet, v []*models.Bookmark) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx context.Context, sel ast.SelectionSet, v *models.Bookmark) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Bookmark(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {

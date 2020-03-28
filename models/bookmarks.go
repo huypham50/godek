@@ -42,14 +42,14 @@ func NewBookmarkService(db *gorm.DB) BookmarkService {
 }
 
 // ByID -> get deck by id
-func (bs *BookmarkService) ByID(ID int) (*Todo, error) {
-	var todo Todo
+func (bs *BookmarkService) ByID(ID int) (*Bookmark, error) {
+	var bookmark Bookmark
 
-	err := bs.db.Where("id = ?", ID).First(&todo).Error
+	err := bs.db.Where("id = ?", ID).First(&bookmark).Error
 
 	switch err {
 	case nil:
-		return &todo, nil
+		return &bookmark, nil
 	case gorm.ErrRecordNotFound:
 		return nil, ErrNotFound
 	default:

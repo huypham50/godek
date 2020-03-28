@@ -6,6 +6,7 @@ package resolvers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
@@ -48,6 +49,10 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 	}
 
 	return todos, nil
+}
+
+func (r *queryResolver) Bookmarks(ctx context.Context) ([]*models.Bookmark, error) {
+	panic(fmt.Errorf("not implemented"))
 }
 
 // Query returns generated.QueryResolver implementation.

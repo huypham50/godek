@@ -111,8 +111,7 @@ func (r *mutationResolver) CreateDeck(ctx context.Context, title string, descrip
 		Color:       color,
 	}
 
-	err := r.Services.Deck.Create(newDeck)
-	if err != nil {
+	if err := r.Services.Deck.Create(newDeck); err != nil {
 		return nil, err
 	}
 
@@ -190,8 +189,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title st
 		Deadline:    deadline,
 	}
 
-	err := r.Services.Todo.Create(newTodo)
-	if err != nil {
+	if err := r.Services.Todo.Create(newTodo); err != nil {
 		return nil, err
 	}
 
@@ -252,6 +250,92 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*models.Todo
 	}
 
 	return removedTodo, nil
+}
+
+func (r *mutationResolver) FetchBookmark(ctx context.Context, url string) (*models.Bookmark, error) {
+	fetchedBookmark, err := r.Services.Bookmark.FetchURL(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return fetchedBookmark, nil
+}
+
+func (r *mutationResolver) CreateBookmark(ctx context.Context, deckID *int, title string, description string, thumbnail string, wordCount int) (*models.Bookmark, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	newBookmark := &models.Bookmark{
+		UserID:      user.ID,
+		DeckID:      *deckID,
+		Title:       title,
+		Description: description,
+		Thumbnail:   thumbnail,
+		WordCount:   wordCount,
+	}
+
+	if err := r.Services.Bookmark.Create(newBookmark); err != nil {
+		return nil, err
+	}
+
+	return newBookmark, nil
+}
+
+func (r *mutationResolver) UpdateBookmark(ctx context.Context, id int, deckID *int, title string, description string) (*models.Bookmark, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	updatedBookmark, err := r.Services.Bookmark.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != updatedBookmark.UserID {
+		return nil, errors.New("You are unauthorized to edit this deck")
+	}
+
+	updatedBookmark.DeckID = *deckID
+	updatedBookmark.Title = title
+	updatedBookmark.Description = description
+
+	if err := r.Services.Bookmark.Update(updatedBookmark); err != nil {
+		return nil, err
+	}
+
+	return updatedBookmark, nil
+}
+
+func (r *mutationResolver) DeleteBookmark(ctx context.Context, id int) (*models.Bookmark, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	removedBookmark, err := r.Services.Bookmark.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != removedBookmark.UserID {
+		return nil, errors.New("You are unauthorized to delete this deck")
+	}
+
+	// remove user
+	if err := r.Services.Bookmark.Delete(removedBookmark); err != nil {
+		return nil, err
+	}
+
+	return removedBookmark, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
