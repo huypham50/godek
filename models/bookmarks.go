@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,7 +24,7 @@ type Bookmark struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Thumbnail   string `json:"thumbnail"`
-	WordCount   int    `json:"wordCount`
+	WordCount   int    `json:"wordCount"`
 	Archive     bool   `json:"archive"`
 }
 
@@ -98,7 +97,6 @@ func (bs *BookmarkService) Delete(bookmark *Bookmark) error {
 
 // Filter -> search decks from user id
 func (bs *BookmarkService) Filter(userID int) ([]*Bookmark, error) {
-	fmt.Println(userID)
 	var bookmarks []*Bookmark
 	if err := bs.db.Where("user_id = ?", userID).Find(&bookmarks).Error; err != nil {
 		return nil, err

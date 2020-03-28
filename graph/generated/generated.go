@@ -78,14 +78,13 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateBookmark      func(childComplexity int, deckID *int, title string, description string, thumbnail string, wordCount int) int
+		CreateBookmark      func(childComplexity int, url string) int
 		CreateDeck          func(childComplexity int, title string, description string, label string, color string) int
 		CreateTodo          func(childComplexity int, deckID *int, title string, description string, deadline time.Time) int
 		DeleteBookmark      func(childComplexity int, id int) int
 		DeleteDeck          func(childComplexity int, id int) int
 		DeleteGoogleAccount func(childComplexity int, email string) int
 		DeleteTodo          func(childComplexity int, id int) int
-		FetchBookmark       func(childComplexity int, url string) int
 		LoginGoogle         func(childComplexity int, token string, name string, email string, avatar string) int
 		Logout              func(childComplexity int) int
 		LogoutAll           func(childComplexity int) int
@@ -140,8 +139,7 @@ type MutationResolver interface {
 	CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error)
 	UpdateTodo(ctx context.Context, id int, deckID *int, title string, description string, deadline time.Time, complete bool) (*models.Todo, error)
 	DeleteTodo(ctx context.Context, id int) (*models.Todo, error)
-	FetchBookmark(ctx context.Context, url string) (*models.Bookmark, error)
-	CreateBookmark(ctx context.Context, deckID *int, title string, description string, thumbnail string, wordCount int) (*models.Bookmark, error)
+	CreateBookmark(ctx context.Context, url string) (*models.Bookmark, error)
 	UpdateBookmark(ctx context.Context, id int, deckID *int, title string, description string) (*models.Bookmark, error)
 	DeleteBookmark(ctx context.Context, id int) (*models.Bookmark, error)
 }
@@ -345,7 +343,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateBookmark(childComplexity, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["thumbnail"].(string), args["wordCount"].(int)), true
+		return e.complexity.Mutation.CreateBookmark(childComplexity, args["url"].(string)), true
 
 	case "Mutation.createDeck":
 		if e.complexity.Mutation.CreateDeck == nil {
@@ -418,18 +416,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteTodo(childComplexity, args["id"].(int)), true
-
-	case "Mutation.fetchBookmark":
-		if e.complexity.Mutation.FetchBookmark == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_fetchBookmark_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.FetchBookmark(childComplexity, args["url"].(string)), true
 
 	case "Mutation.loginGoogle":
 		if e.complexity.Mutation.LoginGoogle == nil {
@@ -791,14 +777,7 @@ directive @goField(
   deleteTodo(id: Int!): Todo!
 
   # Bookmark Service
-  fetchBookmark(url: String!): Bookmark!
-  createBookmark(
-    deckId: Int
-    title: String!
-    description: String!
-    thumbnail: String!
-    wordCount: Int!
-  ): Bookmark!
+  createBookmark(url: String!): Bookmark!
   updateBookmark(
     id: Int!
     deckId: Int
@@ -922,46 +901,14 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_createBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["deckId"]; ok {
-		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+	var arg0 string
+	if tmp, ok := rawArgs["url"]; ok {
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["deckId"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["title"]; ok {
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["title"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["description"]; ok {
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["description"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["thumbnail"]; ok {
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["thumbnail"] = arg3
-	var arg4 int
-	if tmp, ok := rawArgs["wordCount"]; ok {
-		arg4, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["wordCount"] = arg4
+	args["url"] = arg0
 	return args, nil
 }
 
@@ -1094,20 +1041,6 @@ func (ec *executionContext) field_Mutation_deleteTodo_args(ctx context.Context, 
 		}
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_fetchBookmark_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["url"]; ok {
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["url"] = arg0
 	return args, nil
 }
 
@@ -2603,47 +2536,6 @@ func (ec *executionContext) _Mutation_deleteTodo(ctx context.Context, field grap
 	return ec.marshalNTodo2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐTodo(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_fetchBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Mutation",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_fetchBookmark_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().FetchBookmark(rctx, args["url"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*models.Bookmark)
-	fc.Result = res
-	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_createBookmark(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2668,7 +2560,7 @@ func (ec *executionContext) _Mutation_createBookmark(ctx context.Context, field 
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateBookmark(rctx, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["thumbnail"].(string), args["wordCount"].(int))
+		return ec.resolvers.Mutation().CreateBookmark(rctx, args["url"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4907,11 +4799,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "deleteTodo":
 			out.Values[i] = ec._Mutation_deleteTodo(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "fetchBookmark":
-			out.Values[i] = ec._Mutation_fetchBookmark(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}

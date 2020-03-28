@@ -46,14 +46,7 @@ type Mutation {
   deleteTodo(id: Int!): Todo!
 
   # Bookmark Service
-  fetchBookmark(url: String!): Bookmark!
-  createBookmark(
-    deckId: Int
-    title: String!
-    description: String!
-    thumbnail: String!
-    wordCount: Int!
-  ): Bookmark!
+  createBookmark(url: String!): Bookmark!
   updateBookmark(
     id: Int!
     deckId: Int

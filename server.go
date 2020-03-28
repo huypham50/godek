@@ -29,6 +29,7 @@ func main() {
 		models.WithUser(),
 		models.WithDeck(),
 		models.WithTodo(),
+		models.WithBookmark(),
 	)
 	helpers.Must(err)
 	services.DestructiveReset()

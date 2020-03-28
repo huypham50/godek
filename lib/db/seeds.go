@@ -112,6 +112,15 @@ func SeedDatabase(s *models.Services) {
 		},
 	}
 
+	var bookmarks = []models.Bookmark{
+		models.Bookmark{
+			UserID:      3,
+			Title:       "Demot",
+			Description: "Demod",
+			WordCount:   7575,
+		},
+	}
+
 	for _, user := range users {
 		if err := s.User.Create(&user); err != nil {
 			panic(err)
@@ -125,7 +134,13 @@ func SeedDatabase(s *models.Services) {
 	}
 
 	for _, todo := range todos {
-		if err := s.Todo.Create((&todo)); err != nil {
+		if err := s.Todo.Create(&todo); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, bookmark := range bookmarks {
+		if err := s.Bookmark.Create(&bookmark); err != nil {
 			panic(err)
 		}
 	}

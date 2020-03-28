@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -70,8 +69,6 @@ func (ts *TodoService) Delete(todo *Todo) error {
 
 // Filter -> search decks from user id
 func (ts *TodoService) Filter(userID int) ([]*Todo, error) {
-	fmt.Println(userID)
-	fmt.Println("Wth is going on")
 	var todos []*Todo
 	if err := ts.db.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
 		return nil, err

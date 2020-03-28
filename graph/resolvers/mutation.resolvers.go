@@ -252,35 +252,34 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*models.Todo
 	return removedTodo, nil
 }
 
-func (r *mutationResolver) FetchBookmark(ctx context.Context, url string) (*models.Bookmark, error) {
-	fetchedBookmark, err := r.Services.Bookmark.FetchURL(url)
-	if err != nil {
-		return nil, err
-	}
+func (r *mutationResolver) CreateBookmark(ctx context.Context, url string) (*models.Bookmark, error) {
+	fmt.Println("000000000000")
 
-	return fetchedBookmark, nil
-}
-
-func (r *mutationResolver) CreateBookmark(ctx context.Context, deckID *int, title string, description string, thumbnail string, wordCount int) (*models.Bookmark, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")
 	}
 
-	newBookmark := &models.Bookmark{
-		UserID:      user.ID,
-		DeckID:      *deckID,
-		Title:       title,
-		Description: description,
-		Thumbnail:   thumbnail,
-		WordCount:   wordCount,
-	}
+	fmt.Println("111111111111")
 
-	if err := r.Services.Bookmark.Create(newBookmark); err != nil {
+	fetchedBookmark, err := r.Services.Bookmark.FetchURL(url)
+	if err != nil {
 		return nil, err
 	}
 
-	return newBookmark, nil
+	fmt.Println("22222222222")
+
+	fetchedBookmark.UserID = user.ID
+
+	fmt.Printf("%+v\n", fetchedBookmark)
+
+	if err := r.Services.Bookmark.Create(fetchedBookmark); err != nil {
+		return nil, err
+	}
+
+	fmt.Println("33333333333")
+
+	return fetchedBookmark, nil
 }
 
 func (r *mutationResolver) UpdateBookmark(ctx context.Context, id int, deckID *int, title string, description string) (*models.Bookmark, error) {
@@ -342,3 +341,18 @@ func (r *mutationResolver) DeleteBookmark(ctx context.Context, id int) (*models.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 type mutationResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *mutationResolver) FetchBookmark(ctx context.Context, url string) (*models.Bookmark, error) {
+	fetchedBookmark, err := r.Services.Bookmark.FetchURL(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return fetchedBookmark, nil
+}

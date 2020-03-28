@@ -12,4 +12,5 @@ type User @goModel(model: "github.com/phamstack/godek/models.User") {
 
   # decks: [Deck]
   # todos: [Todo]
+  # bookmarks: [Bookmark]
 }
