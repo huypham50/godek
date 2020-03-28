@@ -11,4 +11,5 @@ type User @goModel(model: "github.com/phamstack/godek/models.User") {
   accountType: Int!
 
   # decks: [Deck]
+  # todos: [Todo]
 }

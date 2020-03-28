@@ -1,6 +1,10 @@
 package db
 
-import "github.com/phamstack/godek/models"
+import (
+	"time"
+
+	"github.com/phamstack/godek/models"
+)
 
 // SeedDatabase -> Seed database for initial setup
 func SeedDatabase(s *models.Services) {
@@ -24,6 +28,11 @@ func SeedDatabase(s *models.Services) {
 			GoogleID: "007482",
 			Email:    "luck@blood.colts",
 			Name:     "Andrew Luck",
+		},
+		models.User{
+			GoogleID: "111172427755155985046",
+			Email:    "cocwedc@gmail.com",
+			Name:     "Pham Huy",
 		},
 	}
 
@@ -57,11 +66,49 @@ func SeedDatabase(s *models.Services) {
 			Color:       "#444",
 		},
 		models.Deck{
-			UserID:      3,
-			Title:       "New England Patriots",
-			Description: "Second stint",
-			Label:       "NE2",
-			Color:       "#c11",
+			UserID:      5,
+			Title:       "Baltimore Ravens",
+			Description: "New Era",
+			Label:       "BAL",
+			Color:       "purple",
+		},
+		models.Deck{
+			UserID:      5,
+			Title:       "Seattle Seahawks",
+			Description: "Run The Football",
+			Label:       "SEATLLE",
+			Color:       "green",
+		},
+		models.Deck{
+			UserID:      5,
+			Title:       "Denver Broncos",
+			Description: "Homeboy Done Good",
+			Label:       "DEN",
+			Color:       "orange",
+		},
+	}
+
+	var todos = []models.Todo{
+		models.Todo{
+			UserID:      5,
+			DeckID:      6,
+			Title:       "Eating Lunch",
+			Description: "12pm",
+			Deadline:    time.Now().Add(time.Hour * 100),
+		},
+		models.Todo{
+			UserID:      5,
+			DeckID:      6,
+			Title:       "Having Fun",
+			Description: "all day",
+			Deadline:    time.Now().Add(time.Hour * 15),
+		},
+		models.Todo{
+			UserID:      5,
+			DeckID:      7,
+			Title:       "Practice Bunch",
+			Description: "bruh",
+			Deadline:    time.Now().Add(time.Hour * 48),
 		},
 	}
 
@@ -76,5 +123,12 @@ func SeedDatabase(s *models.Services) {
 			panic(err)
 		}
 	}
+
+	for _, todo := range todos {
+		if err := s.Todo.Create((&todo)); err != nil {
+			panic(err)
+		}
+	}
+
 	return
 }

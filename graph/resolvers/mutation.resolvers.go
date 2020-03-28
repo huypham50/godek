@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
@@ -173,6 +174,84 @@ func (r *mutationResolver) DeleteDeck(ctx context.Context, id int) (*models.Deck
 	}
 
 	return removedDeck, nil
+}
+
+func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	newTodo := &models.Todo{
+		UserID:      user.ID,
+		DeckID:      *deckID,
+		Title:       title,
+		Description: description,
+		Deadline:    deadline,
+	}
+
+	err := r.Services.Todo.Create(newTodo)
+	if err != nil {
+		return nil, err
+	}
+
+	return newTodo, nil
+}
+
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, deckID *int, title string, description string, deadline time.Time, complete bool) (*models.Todo, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	updatedTodo, err := r.Services.Todo.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != updatedTodo.UserID {
+		return nil, errors.New("You are unauthorized to edit this deck")
+	}
+
+	updatedTodo.DeckID = *deckID
+	updatedTodo.Title = title
+	updatedTodo.Description = description
+	updatedTodo.Deadline = deadline
+
+	if err := r.Services.Todo.Update(updatedTodo); err != nil {
+		return nil, err
+	}
+
+	return updatedTodo, nil
+}
+
+func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*models.Todo, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	removedTodo, err := r.Services.Todo.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != removedTodo.UserID {
+		return nil, errors.New("You are unauthorized to delete this deck")
+	}
+
+	// remove user
+	if err := r.Services.Todo.Delete(removedTodo); err != nil {
+		return nil, err
+	}
+
+	return removedTodo, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

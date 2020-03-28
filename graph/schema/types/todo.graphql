@@ -1,0 +1,14 @@
+type Todo @goModel(model: "github.com/phamstack/godek/models.Todo") {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
+
+  userId: ID!
+  deckId: ID
+
+  title: String!
+  description: String!
+  deadline: Time!
+  complete: Boolean!
+}

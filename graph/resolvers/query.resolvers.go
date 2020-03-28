@@ -36,6 +36,20 @@ func (r *queryResolver) Decks(ctx context.Context) ([]*models.Deck, error) {
 	return decks, nil
 }
 
+func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	todos, err := r.Services.Todo.Filter(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return todos, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

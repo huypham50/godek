@@ -27,4 +27,21 @@ type Mutation {
     archive: Boolean!
   ): Deck!
   deleteDeck(id: Int!): Deck!
+
+  # Todo Service
+  createTodo(
+    deckId: Int
+    title: String!
+    description: String!
+    deadline: Time!
+  ): Todo!
+  updateTodo(
+    id: Int!
+    deckId: Int
+    title: String!
+    description: String!
+    deadline: Time!
+    complete: Boolean!
+  ): Todo!
+  deleteTodo(id: Int!): Todo!
 }

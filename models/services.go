@@ -11,6 +11,7 @@ import (
 type Services struct {
 	User UserService
 	Deck DeckService
+	Todo TodoService
 	db   *gorm.DB
 }
 
@@ -53,6 +54,14 @@ func WithDeck() ServicesConfig {
 	}
 }
 
+// WithTodo -> &TodoService singleton
+func WithTodo() ServicesConfig {
+	return func(s *Services) error {
+		s.Todo = NewTodoService(s.db)
+		return nil
+	}
+}
+
 // NewServices -> single source of truth
 // umbrella db connection -> connect to other services
 func NewServices(cfgs ...ServicesConfig) (*Services, error) {
@@ -77,7 +86,7 @@ func (s *Services) Close() error {
 
 // DestructiveReset -> drops all tables and rebuilds them
 func (s *Services) DestructiveReset() error {
-	err := s.db.DropTableIfExists(&User{}, &Deck{}).Error
+	err := s.db.DropTableIfExists(&User{}, &Deck{}, &Todo{}).Error
 	if err != nil {
 		return err
 	}
@@ -86,5 +95,5 @@ func (s *Services) DestructiveReset() error {
 
 // AutoMigrate -> reset database table
 func (s *Services) AutoMigrate() error {
-	return s.db.AutoMigrate(&User{}, &Deck{}).Error
+	return s.db.AutoMigrate(&User{}, &Deck{}, &Todo{}).Error
 }

@@ -28,6 +28,7 @@ func main() {
 		models.WithLogMode(true),
 		models.WithUser(),
 		models.WithDeck(),
+		models.WithTodo(),
 	)
 	helpers.Must(err)
 	services.DestructiveReset()
