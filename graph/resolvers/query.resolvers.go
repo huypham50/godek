@@ -64,6 +64,20 @@ func (r *queryResolver) Bookmarks(ctx context.Context) ([]*models.Bookmark, erro
 	return bookmarks, nil
 }
 
+func (r *queryResolver) Snippets(ctx context.Context) ([]*models.Snippet, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	snippets, err := r.Services.Snippet.Filter(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return snippets, nil
+}
+
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 

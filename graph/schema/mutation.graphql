@@ -12,34 +12,16 @@ type Mutation {
   updateGoogleAccount(name: String!): User!
 
   # Deck Service
-  createDeck(
-    title: String!
-    description: String!
-    label: String!
-    color: String!
-  ): Deck!
-  updateDeck(
-    id: Int!
-    title: String!
-    description: String!
-    label: String!
-    color: String!
-    archive: Boolean!
-  ): Deck!
+  createDeck(label: String!, color: String!): Deck!
+  updateDeck(id: Int!, label: String!, color: String!, archive: Boolean!): Deck!
   deleteDeck(id: Int!): Deck!
 
   # Todo Service
-  createTodo(
-    deckId: Int
-    title: String!
-    description: String!
-    deadline: Time!
-  ): Todo!
+  createTodo(deckId: Int, title: String!, deadline: Time!): Todo!
   updateTodo(
     id: Int!
     deckId: Int
     title: String!
-    description: String!
     deadline: Time!
     complete: Boolean!
   ): Todo!
@@ -54,4 +36,14 @@ type Mutation {
     description: String!
   ): Bookmark!
   deleteBookmark(id: Int!): Bookmark!
+
+  # Snippet Service
+  createSnippet(deckId: Int, title: String!, description: String!): Snippet!
+  updateSnippet(
+    id: Int!
+    deckId: Int
+    title: String!
+    description: String!
+  ): Snippet!
+  deleteSnippet(id: Int!): Snippet!
 }

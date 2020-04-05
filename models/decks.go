@@ -17,11 +17,9 @@ type Deck struct {
 
 	UserID int `json:"userId" gorm:"index:user_id_deck;not null"`
 
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Label       string `json:"label" gorm:"not null"`
-	Color       string `json:"color"`
-	Archive     bool   `json:"archive"`
+	Label   string `json:"label" gorm:"not null"`
+	Color   string `json:"color"`
+	Archive bool   `json:"archive"`
 }
 
 // DeckService -> layer implementation of decks

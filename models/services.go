@@ -9,11 +9,12 @@ import (
 
 // Services -> single database connection to different services
 type Services struct {
+	db       *gorm.DB
 	User     UserService
 	Deck     DeckService
 	Todo     TodoService
 	Bookmark BookmarkService
-	db       *gorm.DB
+	Snippet  SnippetService
 }
 
 // ServicesConfig -> configurations
@@ -71,6 +72,13 @@ func WithBookmark() ServicesConfig {
 	}
 }
 
+func WithSnippet() ServicesConfig {
+	return func(s *Services) error {
+		s.Snippet = NewSnippetService(s.db)
+		return nil
+	}
+}
+
 // NewServices -> single source of truth
 // umbrella db connection -> connect to other services
 func NewServices(cfgs ...ServicesConfig) (*Services, error) {
@@ -95,7 +103,7 @@ func (s *Services) Close() error {
 
 // DestructiveReset -> drops all tables and rebuilds them
 func (s *Services) DestructiveReset() error {
-	err := s.db.DropTableIfExists(&User{}, &Deck{}, &Todo{}, &Bookmark{}).Error
+	err := s.db.DropTableIfExists(&User{}, &Deck{}, &Snippet{}, &Todo{}, &Bookmark{}).Error
 	if err != nil {
 		return err
 	}
@@ -104,5 +112,5 @@ func (s *Services) DestructiveReset() error {
 
 // AutoMigrate -> reset database table
 func (s *Services) AutoMigrate() error {
-	return s.db.AutoMigrate(&User{}, &Deck{}, &Todo{}, &Bookmark{}).Error
+	return s.db.AutoMigrate(&User{}, &Deck{}, &Snippet{}, &Todo{}, &Bookmark{}).Error
 }

@@ -18,10 +18,9 @@ type Todo struct {
 	UserID int `json:"userId" gorm:"index:user_id_todo;not null"`
 	DeckID int `json:"deckId" gorm:"index:deck_id_todo"`
 
-	Title       string    `json:"title"`
-	Description string    `json:"description"`
-	Deadline    time.Time `json:"deadline"`
-	Complete    bool      `json:"archive"`
+	Title    string    `json:"title"`
+	Deadline time.Time `json:"deadline"`
+	Complete bool      `json:"complete"`
 }
 
 // TodoService -> layer implementation of decks

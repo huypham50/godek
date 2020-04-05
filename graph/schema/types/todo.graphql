@@ -8,7 +8,6 @@ type Todo @goModel(model: "github.com/phamstack/godek/models.Todo") {
   deckId: ID
 
   title: String!
-  description: String!
   deadline: Time!
   complete: Boolean!
 }

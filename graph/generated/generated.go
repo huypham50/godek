@@ -65,46 +65,47 @@ type ComplexityRoot struct {
 	}
 
 	Deck struct {
-		Archive     func(childComplexity int) int
-		Color       func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		DeletedAt   func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Label       func(childComplexity int) int
-		Title       func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		UserID      func(childComplexity int) int
+		Archive   func(childComplexity int) int
+		Color     func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Label     func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	Mutation struct {
 		CreateBookmark      func(childComplexity int, url string) int
-		CreateDeck          func(childComplexity int, title string, description string, label string, color string) int
-		CreateTodo          func(childComplexity int, deckID *int, title string, description string, deadline time.Time) int
+		CreateDeck          func(childComplexity int, label string, color string) int
+		CreateSnippet       func(childComplexity int, deckID *int, title string, description string) int
+		CreateTodo          func(childComplexity int, deckID *int, title string, deadline time.Time) int
 		DeleteBookmark      func(childComplexity int, id int) int
 		DeleteDeck          func(childComplexity int, id int) int
 		DeleteGoogleAccount func(childComplexity int, email string) int
+		DeleteSnippet       func(childComplexity int, id int) int
 		DeleteTodo          func(childComplexity int, id int) int
 		LoginGoogle         func(childComplexity int, token string, name string, email string, avatar string) int
 		Logout              func(childComplexity int) int
 		LogoutAll           func(childComplexity int) int
 		UpdateBookmark      func(childComplexity int, id int, deckID *int, title string, description string) int
-		UpdateDeck          func(childComplexity int, id int, title string, description string, label string, color string, archive bool) int
+		UpdateDeck          func(childComplexity int, id int, label string, color string, archive bool) int
 		UpdateGoogleAccount func(childComplexity int, name string) int
-		UpdateTodo          func(childComplexity int, id int, deckID *int, title string, description string, deadline time.Time, complete bool) int
+		UpdateSnippet       func(childComplexity int, id int, deckID *int, title string, description string) int
+		UpdateTodo          func(childComplexity int, id int, deckID *int, title string, deadline time.Time, complete bool) int
 	}
 
 	Query struct {
 		Bookmarks func(childComplexity int) int
 		Decks     func(childComplexity int) int
 		Me        func(childComplexity int) int
+		Snippets  func(childComplexity int) int
 		Todos     func(childComplexity int) int
 	}
 
-	Todo struct {
-		Complete    func(childComplexity int) int
+	Snippet struct {
+		Archive     func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
-		Deadline    func(childComplexity int) int
 		DeckID      func(childComplexity int) int
 		DeletedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
@@ -112,6 +113,18 @@ type ComplexityRoot struct {
 		Title       func(childComplexity int) int
 		UpdatedAt   func(childComplexity int) int
 		UserID      func(childComplexity int) int
+	}
+
+	Todo struct {
+		Complete  func(childComplexity int) int
+		CreatedAt func(childComplexity int) int
+		Deadline  func(childComplexity int) int
+		DeckID    func(childComplexity int) int
+		DeletedAt func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Title     func(childComplexity int) int
+		UpdatedAt func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	User struct {
@@ -133,21 +146,25 @@ type MutationResolver interface {
 	LogoutAll(ctx context.Context) (*models.User, error)
 	DeleteGoogleAccount(ctx context.Context, email string) (*models.User, error)
 	UpdateGoogleAccount(ctx context.Context, name string) (*models.User, error)
-	CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error)
-	UpdateDeck(ctx context.Context, id int, title string, description string, label string, color string, archive bool) (*models.Deck, error)
+	CreateDeck(ctx context.Context, label string, color string) (*models.Deck, error)
+	UpdateDeck(ctx context.Context, id int, label string, color string, archive bool) (*models.Deck, error)
 	DeleteDeck(ctx context.Context, id int) (*models.Deck, error)
-	CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error)
-	UpdateTodo(ctx context.Context, id int, deckID *int, title string, description string, deadline time.Time, complete bool) (*models.Todo, error)
+	CreateTodo(ctx context.Context, deckID *int, title string, deadline time.Time) (*models.Todo, error)
+	UpdateTodo(ctx context.Context, id int, deckID *int, title string, deadline time.Time, complete bool) (*models.Todo, error)
 	DeleteTodo(ctx context.Context, id int) (*models.Todo, error)
 	CreateBookmark(ctx context.Context, url string) (*models.Bookmark, error)
 	UpdateBookmark(ctx context.Context, id int, deckID *int, title string, description string) (*models.Bookmark, error)
 	DeleteBookmark(ctx context.Context, id int) (*models.Bookmark, error)
+	CreateSnippet(ctx context.Context, deckID *int, title string, description string) (*models.Snippet, error)
+	UpdateSnippet(ctx context.Context, id int, deckID *int, title string, description string) (*models.Snippet, error)
+	DeleteSnippet(ctx context.Context, id int) (*models.Snippet, error)
 }
 type QueryResolver interface {
 	Me(ctx context.Context) (*models.User, error)
 	Decks(ctx context.Context) ([]*models.Deck, error)
 	Todos(ctx context.Context) ([]*models.Todo, error)
 	Bookmarks(ctx context.Context) ([]*models.Bookmark, error)
+	Snippets(ctx context.Context) ([]*models.Snippet, error)
 }
 
 type executableSchema struct {
@@ -291,13 +308,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Deck.DeletedAt(childComplexity), true
 
-	case "Deck.description":
-		if e.complexity.Deck.Description == nil {
-			break
-		}
-
-		return e.complexity.Deck.Description(childComplexity), true
-
 	case "Deck.id":
 		if e.complexity.Deck.ID == nil {
 			break
@@ -311,13 +321,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Deck.Label(childComplexity), true
-
-	case "Deck.title":
-		if e.complexity.Deck.Title == nil {
-			break
-		}
-
-		return e.complexity.Deck.Title(childComplexity), true
 
 	case "Deck.updatedAt":
 		if e.complexity.Deck.UpdatedAt == nil {
@@ -355,7 +358,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateDeck(childComplexity, args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string)), true
+		return e.complexity.Mutation.CreateDeck(childComplexity, args["label"].(string), args["color"].(string)), true
+
+	case "Mutation.createSnippet":
+		if e.complexity.Mutation.CreateSnippet == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createSnippet_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateSnippet(childComplexity, args["deckId"].(*int), args["title"].(string), args["description"].(string)), true
 
 	case "Mutation.createTodo":
 		if e.complexity.Mutation.CreateTodo == nil {
@@ -367,7 +382,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTodo(childComplexity, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time)), true
+		return e.complexity.Mutation.CreateTodo(childComplexity, args["deckId"].(*int), args["title"].(string), args["deadline"].(time.Time)), true
 
 	case "Mutation.deleteBookmark":
 		if e.complexity.Mutation.DeleteBookmark == nil {
@@ -404,6 +419,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DeleteGoogleAccount(childComplexity, args["email"].(string)), true
+
+	case "Mutation.deleteSnippet":
+		if e.complexity.Mutation.DeleteSnippet == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteSnippet_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteSnippet(childComplexity, args["id"].(int)), true
 
 	case "Mutation.deleteTodo":
 		if e.complexity.Mutation.DeleteTodo == nil {
@@ -465,7 +492,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateDeck(childComplexity, args["id"].(int), args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string), args["archive"].(bool)), true
+		return e.complexity.Mutation.UpdateDeck(childComplexity, args["id"].(int), args["label"].(string), args["color"].(string), args["archive"].(bool)), true
 
 	case "Mutation.updateGoogleAccount":
 		if e.complexity.Mutation.UpdateGoogleAccount == nil {
@@ -479,6 +506,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.UpdateGoogleAccount(childComplexity, args["name"].(string)), true
 
+	case "Mutation.updateSnippet":
+		if e.complexity.Mutation.UpdateSnippet == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateSnippet_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateSnippet(childComplexity, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string)), true
+
 	case "Mutation.updateTodo":
 		if e.complexity.Mutation.UpdateTodo == nil {
 			break
@@ -489,7 +528,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateTodo(childComplexity, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time), args["complete"].(bool)), true
+		return e.complexity.Mutation.UpdateTodo(childComplexity, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["deadline"].(time.Time), args["complete"].(bool)), true
 
 	case "Query.bookmarks":
 		if e.complexity.Query.Bookmarks == nil {
@@ -512,12 +551,82 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Me(childComplexity), true
 
+	case "Query.snippets":
+		if e.complexity.Query.Snippets == nil {
+			break
+		}
+
+		return e.complexity.Query.Snippets(childComplexity), true
+
 	case "Query.todos":
 		if e.complexity.Query.Todos == nil {
 			break
 		}
 
 		return e.complexity.Query.Todos(childComplexity), true
+
+	case "Snippet.archive":
+		if e.complexity.Snippet.Archive == nil {
+			break
+		}
+
+		return e.complexity.Snippet.Archive(childComplexity), true
+
+	case "Snippet.createdAt":
+		if e.complexity.Snippet.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Snippet.CreatedAt(childComplexity), true
+
+	case "Snippet.deckId":
+		if e.complexity.Snippet.DeckID == nil {
+			break
+		}
+
+		return e.complexity.Snippet.DeckID(childComplexity), true
+
+	case "Snippet.deletedAt":
+		if e.complexity.Snippet.DeletedAt == nil {
+			break
+		}
+
+		return e.complexity.Snippet.DeletedAt(childComplexity), true
+
+	case "Snippet.description":
+		if e.complexity.Snippet.Description == nil {
+			break
+		}
+
+		return e.complexity.Snippet.Description(childComplexity), true
+
+	case "Snippet.id":
+		if e.complexity.Snippet.ID == nil {
+			break
+		}
+
+		return e.complexity.Snippet.ID(childComplexity), true
+
+	case "Snippet.title":
+		if e.complexity.Snippet.Title == nil {
+			break
+		}
+
+		return e.complexity.Snippet.Title(childComplexity), true
+
+	case "Snippet.updatedAt":
+		if e.complexity.Snippet.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Snippet.UpdatedAt(childComplexity), true
+
+	case "Snippet.userId":
+		if e.complexity.Snippet.UserID == nil {
+			break
+		}
+
+		return e.complexity.Snippet.UserID(childComplexity), true
 
 	case "Todo.complete":
 		if e.complexity.Todo.Complete == nil {
@@ -553,13 +662,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.DeletedAt(childComplexity), true
-
-	case "Todo.description":
-		if e.complexity.Todo.Description == nil {
-			break
-		}
-
-		return e.complexity.Todo.Description(childComplexity), true
 
 	case "Todo.id":
 		if e.complexity.Todo.ID == nil {
@@ -743,34 +845,16 @@ directive @goField(
   updateGoogleAccount(name: String!): User!
 
   # Deck Service
-  createDeck(
-    title: String!
-    description: String!
-    label: String!
-    color: String!
-  ): Deck!
-  updateDeck(
-    id: Int!
-    title: String!
-    description: String!
-    label: String!
-    color: String!
-    archive: Boolean!
-  ): Deck!
+  createDeck(label: String!, color: String!): Deck!
+  updateDeck(id: Int!, label: String!, color: String!, archive: Boolean!): Deck!
   deleteDeck(id: Int!): Deck!
 
   # Todo Service
-  createTodo(
-    deckId: Int
-    title: String!
-    description: String!
-    deadline: Time!
-  ): Todo!
+  createTodo(deckId: Int, title: String!, deadline: Time!): Todo!
   updateTodo(
     id: Int!
     deckId: Int
     title: String!
-    description: String!
     deadline: Time!
     complete: Boolean!
   ): Todo!
@@ -785,6 +869,16 @@ directive @goField(
     description: String!
   ): Bookmark!
   deleteBookmark(id: Int!): Bookmark!
+
+  # Snippet Service
+  createSnippet(deckId: Int, title: String!, description: String!): Snippet!
+  updateSnippet(
+    id: Int!
+    deckId: Int
+    title: String!
+    description: String!
+  ): Snippet!
+  deleteSnippet(id: Int!): Snippet!
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/query.graphql", Input: `type Query {
@@ -795,6 +889,8 @@ directive @goField(
   todos: [Todo]
 
   bookmarks: [Bookmark]
+
+  snippets: [Snippet]
 }
 `, BuiltIn: false},
 	&ast.Source{Name: "graph/schema/scalars.graphql", Input: `# gqlgen supports some custom scalars out of the box
@@ -853,10 +949,22 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
 
   userId: ID!
 
-  title: String!
-  description: String!
   label: String!
   color: String!
+  archive: Boolean!
+}
+`, BuiltIn: false},
+	&ast.Source{Name: "graph/schema/types/snippet.graphql", Input: `type Snippet @goModel(model: "github.com/phamstack/godek/models.Snippet") {
+  id: ID!
+  createdAt: Time!
+  updatedAt: Time!
+  deletedAt: Time
+
+  userId: ID!
+  deckId: ID
+
+  title: String!
+  description: String!
   archive: Boolean!
 }
 `, BuiltIn: false},
@@ -870,7 +978,6 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
   deckId: ID
 
   title: String!
-  description: String!
   deadline: Time!
   complete: Boolean!
 }
@@ -917,41 +1024,25 @@ func (ec *executionContext) field_Mutation_createDeck_args(ctx context.Context, 
 	var err error
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["title"]; ok {
+	if tmp, ok := rawArgs["label"]; ok {
 		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["title"] = arg0
+	args["label"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["description"]; ok {
+	if tmp, ok := rawArgs["color"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["description"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["label"]; ok {
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["label"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["color"]; ok {
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["color"] = arg3
+	args["color"] = arg1
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createSnippet_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *int
@@ -978,14 +1069,36 @@ func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, 
 		}
 	}
 	args["description"] = arg2
-	var arg3 time.Time
-	if tmp, ok := rawArgs["deadline"]; ok {
-		arg3, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["deckId"]; ok {
+		arg0, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["deadline"] = arg3
+	args["deckId"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg1
+	var arg2 time.Time
+	if tmp, ok := rawArgs["deadline"]; ok {
+		arg2, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["deadline"] = arg2
 	return args, nil
 }
 
@@ -1028,6 +1141,20 @@ func (ec *executionContext) field_Mutation_deleteGoogleAccount_args(ctx context.
 		}
 	}
 	args["email"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteSnippet_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -1133,45 +1260,29 @@ func (ec *executionContext) field_Mutation_updateDeck_args(ctx context.Context, 
 	}
 	args["id"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["title"]; ok {
+	if tmp, ok := rawArgs["label"]; ok {
 		arg1, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["title"] = arg1
+	args["label"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["description"]; ok {
+	if tmp, ok := rawArgs["color"]; ok {
 		arg2, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["description"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["label"]; ok {
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["label"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["color"]; ok {
-		arg4, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["color"] = arg4
-	var arg5 bool
+	args["color"] = arg2
+	var arg3 bool
 	if tmp, ok := rawArgs["archive"]; ok {
-		arg5, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		arg3, err = ec.unmarshalNBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["archive"] = arg5
+	args["archive"] = arg3
 	return args, nil
 }
 
@@ -1189,7 +1300,7 @@ func (ec *executionContext) field_Mutation_updateGoogleAccount_args(ctx context.
 	return args, nil
 }
 
-func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_updateSnippet_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 int
@@ -1224,22 +1335,52 @@ func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, 
 		}
 	}
 	args["description"] = arg3
-	var arg4 time.Time
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_updateTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["id"]; ok {
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["id"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["deckId"]; ok {
+		arg1, err = ec.unmarshalOInt2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["deckId"] = arg1
+	var arg2 string
+	if tmp, ok := rawArgs["title"]; ok {
+		arg2, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["title"] = arg2
+	var arg3 time.Time
 	if tmp, ok := rawArgs["deadline"]; ok {
-		arg4, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
+		arg3, err = ec.unmarshalNTime2timeᚐTime(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["deadline"] = arg4
-	var arg5 bool
+	args["deadline"] = arg3
+	var arg4 bool
 	if tmp, ok := rawArgs["complete"]; ok {
-		arg5, err = ec.unmarshalNBoolean2bool(ctx, tmp)
+		arg4, err = ec.unmarshalNBoolean2bool(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["complete"] = arg5
+	args["complete"] = arg4
 	return args, nil
 }
 
@@ -1930,74 +2071,6 @@ func (ec *executionContext) _Deck_userId(ctx context.Context, field graphql.Coll
 	return ec.marshalNID2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Deck_title(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Deck",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Deck_description(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Deck",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Deck_label(ctx context.Context, field graphql.CollectedField, obj *models.Deck) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2315,7 +2388,7 @@ func (ec *executionContext) _Mutation_createDeck(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateDeck(rctx, args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string))
+		return ec.resolvers.Mutation().CreateDeck(rctx, args["label"].(string), args["color"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2356,7 +2429,7 @@ func (ec *executionContext) _Mutation_updateDeck(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateDeck(rctx, args["id"].(int), args["title"].(string), args["description"].(string), args["label"].(string), args["color"].(string), args["archive"].(bool))
+		return ec.resolvers.Mutation().UpdateDeck(rctx, args["id"].(int), args["label"].(string), args["color"].(string), args["archive"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2438,7 +2511,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTodo(rctx, args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time))
+		return ec.resolvers.Mutation().CreateTodo(rctx, args["deckId"].(*int), args["title"].(string), args["deadline"].(time.Time))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2479,7 +2552,7 @@ func (ec *executionContext) _Mutation_updateTodo(ctx context.Context, field grap
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().UpdateTodo(rctx, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string), args["deadline"].(time.Time), args["complete"].(bool))
+		return ec.resolvers.Mutation().UpdateTodo(rctx, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["deadline"].(time.Time), args["complete"].(bool))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2660,6 +2733,129 @@ func (ec *executionContext) _Mutation_deleteBookmark(ctx context.Context, field 
 	return ec.marshalNBookmark2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Mutation_createSnippet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_createSnippet_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateSnippet(rctx, args["deckId"].(*int), args["title"].(string), args["description"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Snippet)
+	fc.Result = res
+	return ec.marshalNSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_updateSnippet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_updateSnippet_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateSnippet(rctx, args["id"].(int), args["deckId"].(*int), args["title"].(string), args["description"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Snippet)
+	fc.Result = res
+	return ec.marshalNSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_deleteSnippet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_deleteSnippet_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteSnippet(rctx, args["id"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*models.Snippet)
+	fc.Result = res
+	return ec.marshalNSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2787,6 +2983,37 @@ func (ec *executionContext) _Query_bookmarks(ctx context.Context, field graphql.
 	return ec.marshalOBookmark2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐBookmark(ctx, field.Selections, res)
 }
 
+func (ec *executionContext) _Query_snippets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Snippets(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*models.Snippet)
+	fc.Result = res
+	return ec.marshalOSnippet2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx, field.Selections, res)
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -2854,6 +3081,306 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	res := resTmp.(*introspection.Schema)
 	fc.Result = res
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_id(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_updatedAt(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_deletedAt(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeletedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_userId(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_deckId(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeckID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalOID2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_title(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Title, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_description(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Description, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Snippet_archive(ctx context.Context, field graphql.CollectedField, obj *models.Snippet) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:   "Snippet",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Archive, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *models.Todo) (ret graphql.Marshaler) {
@@ -3072,40 +3599,6 @@ func (ec *executionContext) _Todo_title(ctx context.Context, field graphql.Colle
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Title, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Todo_description(ctx context.Context, field graphql.CollectedField, obj *models.Todo) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:   "Todo",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4697,16 +5190,6 @@ func (ec *executionContext) _Deck(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "title":
-			out.Values[i] = ec._Deck_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "description":
-			out.Values[i] = ec._Deck_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "label":
 			out.Values[i] = ec._Deck_label(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4818,6 +5301,21 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
+		case "createSnippet":
+			out.Values[i] = ec._Mutation_createSnippet(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updateSnippet":
+			out.Values[i] = ec._Mutation_updateSnippet(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deleteSnippet":
+			out.Values[i] = ec._Mutation_deleteSnippet(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4891,10 +5389,82 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				res = ec._Query_bookmarks(ctx, field)
 				return res
 			})
+		case "snippets":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_snippets(ctx, field)
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
 			out.Values[i] = ec._Query___schema(ctx, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var snippetImplementors = []string{"Snippet"}
+
+func (ec *executionContext) _Snippet(ctx context.Context, sel ast.SelectionSet, obj *models.Snippet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, snippetImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Snippet")
+		case "id":
+			out.Values[i] = ec._Snippet_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Snippet_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Snippet_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deletedAt":
+			out.Values[i] = ec._Snippet_deletedAt(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._Snippet_userId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "deckId":
+			out.Values[i] = ec._Snippet_deckId(ctx, field, obj)
+		case "title":
+			out.Values[i] = ec._Snippet_title(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "description":
+			out.Values[i] = ec._Snippet_description(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "archive":
+			out.Values[i] = ec._Snippet_archive(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4943,11 +5513,6 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Todo_deckId(ctx, field, obj)
 		case "title":
 			out.Values[i] = ec._Todo_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "description":
-			out.Values[i] = ec._Todo_description(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -5363,6 +5928,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNSnippet2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx context.Context, sel ast.SelectionSet, v models.Snippet) graphql.Marshaler {
+	return ec._Snippet(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx context.Context, sel ast.SelectionSet, v *models.Snippet) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Snippet(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -5801,6 +6380,57 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 		return graphql.Null
 	}
 	return ec.marshalOInt2int(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOSnippet2githubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx context.Context, sel ast.SelectionSet, v models.Snippet) graphql.Marshaler {
+	return ec._Snippet(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOSnippet2ᚕᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx context.Context, sel ast.SelectionSet, v []*models.Snippet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
+}
+
+func (ec *executionContext) marshalOSnippet2ᚖgithubᚗcomᚋphamstackᚋgodekᚋmodelsᚐSnippet(ctx context.Context, sel ast.SelectionSet, v *models.Snippet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Snippet(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

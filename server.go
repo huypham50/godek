@@ -28,6 +28,7 @@ func main() {
 		models.WithLogMode(true),
 		models.WithUser(),
 		models.WithDeck(),
+		models.WithSnippet(),
 		models.WithTodo(),
 		models.WithBookmark(),
 	)

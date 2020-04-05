@@ -38,77 +38,87 @@ func SeedDatabase(s *models.Services) {
 
 	var decks = []models.Deck{
 		models.Deck{
-			UserID:      1,
-			Title:       "Indianapolis Colts",
-			Description: "Carrying The Colts",
-			Label:       "IND",
-			Color:       "#ece",
+			UserID: 1,
+			Label:  "IND",
+			Color:  "#ece",
 		},
 		models.Deck{
-			UserID:      1,
-			Title:       "Denver Broncos",
-			Description: "Defense Win Championships",
-			Label:       "DEN",
-			Color:       "#e67",
+			UserID: 1,
+			Label:  "DEN",
+			Color:  "#e67",
 		},
 		models.Deck{
-			UserID:      3,
-			Title:       "New England Patriots",
-			Description: "Being Tom Brady's Sub",
-			Label:       "NE",
-			Color:       "#c11",
+			UserID: 3,
+			Label:  "NE",
+			Color:  "#c11",
 		},
 		models.Deck{
-			UserID:      3,
-			Title:       "San Francisco 49ers",
-			Description: "Riding the Defense Till' The End",
-			Label:       "SF",
-			Color:       "#444",
+			UserID: 3,
+			Label:  "SF",
+			Color:  "#444",
 		},
 		models.Deck{
+			UserID: 5,
+			Label:  "BAL",
+			Color:  "purple",
+		},
+		models.Deck{
+			UserID: 5,
+			Label:  "SEATLLE",
+			Color:  "green",
+		},
+		models.Deck{
+			UserID: 5,
+			Label:  "DEN",
+			Color:  "orange",
+		},
+	}
+
+	var snippets = []models.Snippet{
+		models.Snippet{
 			UserID:      5,
-			Title:       "Baltimore Ravens",
-			Description: "New Era",
-			Label:       "BAL",
-			Color:       "purple",
+			DeckID:      7,
+			Title:       "Shopping List For This Week",
+			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
-		models.Deck{
+		models.Snippet{
 			UserID:      5,
-			Title:       "Seattle Seahawks",
-			Description: "Run The Football",
-			Label:       "SEATLLE",
-			Color:       "green",
+			DeckID:      5,
+			Title:       "Super Bowl Predictions",
+			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
-		models.Deck{
+		models.Snippet{
 			UserID:      5,
-			Title:       "Denver Broncos",
-			Description: "Homeboy Done Good",
-			Label:       "DEN",
-			Color:       "orange",
+			DeckID:      7,
+			Title:       "Final Project Pacman Competition",
+			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
+		},
+		models.Snippet{
+			UserID:      5,
+			DeckID:      6,
+			Title:       "Chapter 9 L1 lecture with sound (fixed)",
+			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
 	}
 
 	var todos = []models.Todo{
 		models.Todo{
-			UserID:      5,
-			DeckID:      6,
-			Title:       "Eating Lunch",
-			Description: "12pm",
-			Deadline:    time.Now().Add(time.Hour * 72),
+			UserID:   5,
+			DeckID:   6,
+			Title:    "Eating Lunch",
+			Deadline: time.Now().Add(time.Hour * 72),
 		},
 		models.Todo{
-			UserID:      5,
-			DeckID:      6,
-			Title:       "Having Fun",
-			Description: "all day",
-			Deadline:    time.Now(),
+			UserID:   5,
+			DeckID:   6,
+			Title:    "Having Fun",
+			Deadline: time.Now(),
 		},
 		models.Todo{
-			UserID:      5,
-			DeckID:      7,
-			Title:       "Practice Bunch",
-			Description: "bruh",
-			Deadline:    time.Now().Add(time.Hour * 48),
+			UserID:   5,
+			DeckID:   7,
+			Title:    "Practice Bunch",
+			Deadline: time.Now().Add(time.Hour * 48),
 		},
 	}
 
@@ -147,6 +157,12 @@ func SeedDatabase(s *models.Services) {
 
 	for _, deck := range decks {
 		if err := s.Deck.Create(&deck); err != nil {
+			panic(err)
+		}
+	}
+
+	for _, snippet := range snippets {
+		if err := s.Snippet.Create(&snippet); err != nil {
 			panic(err)
 		}
 	}

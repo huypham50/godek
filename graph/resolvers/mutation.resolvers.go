@@ -97,18 +97,16 @@ func (r *mutationResolver) UpdateGoogleAccount(ctx context.Context, name string)
 	return user, nil
 }
 
-func (r *mutationResolver) CreateDeck(ctx context.Context, title string, description string, label string, color string) (*models.Deck, error) {
+func (r *mutationResolver) CreateDeck(ctx context.Context, label string, color string) (*models.Deck, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")
 	}
 
 	newDeck := &models.Deck{
-		UserID:      user.ID,
-		Title:       title,
-		Description: description,
-		Label:       label,
-		Color:       color,
+		UserID: user.ID,
+		Label:  label,
+		Color:  color,
 	}
 
 	if err := r.Services.Deck.Create(newDeck); err != nil {
@@ -118,7 +116,7 @@ func (r *mutationResolver) CreateDeck(ctx context.Context, title string, descrip
 	return newDeck, nil
 }
 
-func (r *mutationResolver) UpdateDeck(ctx context.Context, id int, title string, description string, label string, color string, archive bool) (*models.Deck, error) {
+func (r *mutationResolver) UpdateDeck(ctx context.Context, id int, label string, color string, archive bool) (*models.Deck, error) {
 	// get user from context middleware
 	user := auth.ForContext(ctx)
 	if user == nil {
@@ -136,8 +134,6 @@ func (r *mutationResolver) UpdateDeck(ctx context.Context, id int, title string,
 		return nil, errors.New("You are unauthorized to edit this deck")
 	}
 
-	updatedDeck.Title = title
-	updatedDeck.Description = description
 	updatedDeck.Label = label
 	updatedDeck.Color = color
 	updatedDeck.Archive = archive
@@ -175,20 +171,17 @@ func (r *mutationResolver) DeleteDeck(ctx context.Context, id int) (*models.Deck
 	return removedDeck, nil
 }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error) {
-	fmt.Println(deckID, title, deadline)
-
+func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title string, deadline time.Time) (*models.Todo, error) {
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")
 	}
 
 	newTodo := &models.Todo{
-		UserID:      user.ID,
-		DeckID:      *deckID,
-		Title:       title,
-		Description: description,
-		Deadline:    deadline,
+		UserID:   user.ID,
+		DeckID:   *deckID,
+		Title:    title,
+		Deadline: deadline,
 	}
 
 	if err := r.Services.Todo.Create(newTodo); err != nil {
@@ -198,7 +191,7 @@ func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title st
 	return newTodo, nil
 }
 
-func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, deckID *int, title string, description string, deadline time.Time, complete bool) (*models.Todo, error) {
+func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, deckID *int, title string, deadline time.Time, complete bool) (*models.Todo, error) {
 	// get user from context middleware
 	user := auth.ForContext(ctx)
 	if user == nil {
@@ -218,7 +211,6 @@ func (r *mutationResolver) UpdateTodo(ctx context.Context, id int, deckID *int, 
 
 	updatedTodo.DeckID = *deckID
 	updatedTodo.Title = title
-	updatedTodo.Description = description
 	updatedTodo.Deadline = deadline
 
 	if err := r.Services.Todo.Update(updatedTodo); err != nil {
@@ -255,31 +247,21 @@ func (r *mutationResolver) DeleteTodo(ctx context.Context, id int) (*models.Todo
 }
 
 func (r *mutationResolver) CreateBookmark(ctx context.Context, url string) (*models.Bookmark, error) {
-	fmt.Println("000000000000")
-
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")
 	}
-
-	fmt.Println("111111111111")
 
 	fetchedBookmark, err := r.Services.Bookmark.FetchURL(url)
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("22222222222")
-
 	fetchedBookmark.UserID = user.ID
-
-	fmt.Printf("%+v\n", fetchedBookmark)
 
 	if err := r.Services.Bookmark.Create(fetchedBookmark); err != nil {
 		return nil, err
 	}
-
-	fmt.Println("33333333333")
 
 	return fetchedBookmark, nil
 }
@@ -337,6 +319,81 @@ func (r *mutationResolver) DeleteBookmark(ctx context.Context, id int) (*models.
 	}
 
 	return removedBookmark, nil
+}
+
+func (r *mutationResolver) CreateSnippet(ctx context.Context, deckID *int, title string, description string) (*models.Snippet, error) {
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	newSnippet := &models.Snippet{
+		UserID:      user.ID,
+		DeckID:      *deckID,
+		Title:       title,
+		Description: description,
+	}
+
+	if err := r.Services.Snippet.Create(newSnippet); err != nil {
+		return nil, err
+	}
+
+	return newSnippet, nil
+}
+
+func (r *mutationResolver) UpdateSnippet(ctx context.Context, id int, deckID *int, title string, description string) (*models.Snippet, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	updatedSnippet, err := r.Services.Snippet.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// deck can only be removed by owner
+	if user.ID != updatedSnippet.UserID {
+		return nil, errors.New("You are unauthorized to edit this deck")
+	}
+
+	updatedSnippet.DeckID = *deckID
+	updatedSnippet.Title = title
+	updatedSnippet.Description = description
+
+	if err := r.Services.Snippet.Update(updatedSnippet); err != nil {
+		return nil, err
+	}
+
+	return updatedSnippet, nil
+}
+
+func (r *mutationResolver) DeleteSnippet(ctx context.Context, id int) (*models.Snippet, error) {
+	// get user from context middleware
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("You are not logged in yet")
+	}
+
+	// Find requested removed deck and verify
+	removedSnippet, err := r.Services.Snippet.ByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// snippet can only be removed by owner
+	if user.ID != removedSnippet.UserID {
+		return nil, errors.New("You are unauthorized to delete this deck")
+	}
+
+	// remove user
+	if err := r.Services.Snippet.Delete(removedSnippet); err != nil {
+		return nil, err
+	}
+
+	return removedSnippet, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
