@@ -176,6 +176,8 @@ func (r *mutationResolver) DeleteDeck(ctx context.Context, id int) (*models.Deck
 }
 
 func (r *mutationResolver) CreateTodo(ctx context.Context, deckID *int, title string, description string, deadline time.Time) (*models.Todo, error) {
+	fmt.Println(deckID, title, deadline)
+
 	user := auth.ForContext(ctx)
 	if user == nil {
 		return nil, errors.New("You are not logged in yet")

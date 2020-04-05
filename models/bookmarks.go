@@ -17,8 +17,8 @@ type Bookmark struct {
 	UpdatedAt time.Time
 	DeletedAt *time.Time
 
-	UserID int `json:"userId" gorm:"index:user_id;not null"`
-	DeckID int `json:"deckId" gorm:"index:deck_id"`
+	UserID int `json:"userId" gorm:"index:user_id_bookmark;not null"`
+	DeckID int `json:"deckId" gorm:"index:deck_id_bookmark"`
 
 	URL         string `json:"url"`
 	Title       string `json:"title"`
@@ -98,7 +98,9 @@ func (bs *BookmarkService) Delete(bookmark *Bookmark) error {
 // Filter -> search decks from user id
 func (bs *BookmarkService) Filter(userID int) ([]*Bookmark, error) {
 	var bookmarks []*Bookmark
-	if err := bs.db.Where("user_id = ?", userID).Find(&bookmarks).Error; err != nil {
+
+	// newest first! desc vs asc
+	if err := bs.db.Where("user_id = ?", userID).Order("created_at desc").Find(&bookmarks).Error; err != nil {
 		return nil, err
 	}
 

@@ -94,14 +94,14 @@ func SeedDatabase(s *models.Services) {
 			DeckID:      6,
 			Title:       "Eating Lunch",
 			Description: "12pm",
-			Deadline:    time.Now().Add(time.Hour * 100),
+			Deadline:    time.Now().Add(time.Hour * 72),
 		},
 		models.Todo{
 			UserID:      5,
 			DeckID:      6,
 			Title:       "Having Fun",
 			Description: "all day",
-			Deadline:    time.Now().Add(time.Hour * 15),
+			Deadline:    time.Now(),
 		},
 		models.Todo{
 			UserID:      5,
@@ -114,10 +114,28 @@ func SeedDatabase(s *models.Services) {
 
 	var bookmarks = []models.Bookmark{
 		models.Bookmark{
+			UserID:      5,
+			URL:         "https://www.newyorker.com/science/elements/from-bats-to-human-lungs-the-evolution-of-a-coronavirus",
+			Title:       "From Bats to Human Lungs, the Evolution of a Coronavirus",
+			Description: "SARS-CoV-2, which honed its viral genome for thousands of years, behaves like a monstrous mutant hybrid of all the coronaviruses that came before it.",
+			Thumbnail:   "https://media.newyorker.com/photos/5e7a5bd1ace85e0008863167/16:9/w_1280,c_limit/Kormann-Virusprofile-Respiratory.jpg",
+			WordCount:   24215,
+		},
+		models.Bookmark{
+			UserID:      5,
+			URL:         "https://trix-editor.org/",
+			Title:       "A rich text editor for everyday writing",
+			Description: "Compose beautifully formatted text in your web application. Trix is an editor for writing messages, comments, articles, and lists—the simple documents most web apps are made of. It features a sophisticated document model, support for embedded attachments, and outputs terse and consistent HTML.",
+			Thumbnail:   "",
+			WordCount:   399,
+		},
+		models.Bookmark{
 			UserID:      3,
-			Title:       "Demot",
-			Description: "Demod",
-			WordCount:   7575,
+			URL:         "https://medium.com/towards-artificial-intelligence/keras-callbacks-explained-in-three-minutes-846a43b44a16",
+			Title:       "Keras Callbacks Explained In Three Minutes",
+			Description: "A gentle introduction to callbacks in Keras. Learn about EarlyStopping, ModelCheckpoint, and other callback functions with code examples.",
+			Thumbnail:   "https://miro.medium.com/max/1200/1*wwnExqe720PPHykHhs5Hqw.png",
+			WordCount:   22712,
 		},
 	}
 

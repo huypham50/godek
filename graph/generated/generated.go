@@ -889,6 +889,7 @@ type Auth @goModel(model: "github.com/phamstack/godek/models.Auth") {
 
   # decks: [Deck]
   # todos: [Todo]
+  # bookmarks: [Bookmark]
 }
 `, BuiltIn: false},
 }

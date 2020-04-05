@@ -6,7 +6,6 @@ package resolvers
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/phamstack/godek/graph/generated"
 	"github.com/phamstack/godek/lib/auth"
@@ -52,7 +51,17 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*models.Todo, error) {
 }
 
 func (r *queryResolver) Bookmarks(ctx context.Context) ([]*models.Bookmark, error) {
-	panic(fmt.Errorf("not implemented"))
+	user := auth.ForContext(ctx)
+	if user == nil {
+		return nil, errors.New("Unauthenticated")
+	}
+
+	bookmarks, err := r.Services.Bookmark.Filter(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return bookmarks, nil
 }
 
 // Query returns generated.QueryResolver implementation.

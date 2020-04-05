@@ -15,7 +15,7 @@ type Deck struct {
 	UpdatedAt time.Time
 	DeletedAt *time.Time
 
-	UserID int `json:"userId" gorm:"index:user_id;not null"`
+	UserID int `json:"userId" gorm:"index:user_id_deck;not null"`
 
 	Title       string `json:"title"`
 	Description string `json:"description"`

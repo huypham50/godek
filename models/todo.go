@@ -15,8 +15,8 @@ type Todo struct {
 	UpdatedAt time.Time
 	DeletedAt *time.Time
 
-	UserID int `json:"userId" gorm:"index:user_id;not null"`
-	DeckID int `json:"deckId" gorm:"index:deck_id"`
+	UserID int `json:"userId" gorm:"index:user_id_todo;not null"`
+	DeckID int `json:"deckId" gorm:"index:deck_id_todo"`
 
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
@@ -70,7 +70,9 @@ func (ts *TodoService) Delete(todo *Todo) error {
 // Filter -> search decks from user id
 func (ts *TodoService) Filter(userID int) ([]*Todo, error) {
 	var todos []*Todo
-	if err := ts.db.Where("user_id = ?", userID).Find(&todos).Error; err != nil {
+
+	// deadlinest first desc vs asc
+	if err := ts.db.Where("user_id = ?", userID).Order("deadline asc").Find(&todos).Error; err != nil {
 		return nil, err
 	}
 
