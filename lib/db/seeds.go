@@ -79,7 +79,7 @@ func SeedDatabase(s *models.Services) {
 			UserID:      5,
 			DeckID:      7,
 			Title:       "Shopping List For This Week",
-			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
+			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
 		models.Snippet{
 			UserID:      5,
@@ -91,13 +91,13 @@ func SeedDatabase(s *models.Services) {
 			UserID:      5,
 			DeckID:      7,
 			Title:       "Final Project Pacman Competition",
-			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
+			Description: `[{"children":[{"text":"Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
 		models.Snippet{
 			UserID:      5,
 			DeckID:      6,
 			Title:       "Chapter 9 L1 lecture with sound (fixed)",
-			Description: `[{"children":[{"text":"Sit ut fugit et quae. Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
+			Description: `[{"children":[{"text":"Velit rem esse molestias rerum. Animi ut animi. Doloremque excepturi molestias adipisci nesciunt. Molestias occaecati dolores sed repudiandae mollitia. Officiis maxime a dolores quas."}]},{"children":[{"text":""}]},{"children":[{"text":"Quisquam accusantium voluptates quia officia accusamus nihil voluptas perspiciatis repellendus. Dolor sit adipisci minima amet hic consequatur explicabo sit id. Minima nam magni dicta ut. Sit a laudantium consequatur natus modi molestias. Aliquid quos dolorem illo nesciunt et."}]},{"children":[{"text":""}]}]`,
 		},
 	}
 
